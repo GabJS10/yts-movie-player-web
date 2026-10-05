@@ -1,0 +1,37 @@
+---
+// A desktop window frame (Windows/Linux style controls) around a real app screenshot.
+// Screenshots are served at or below their natural size: widths never exceed the source.
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  sizes: string;
+  id?: string;
+  class?: string;
+  par?: number;
+  eager?: boolean;
+}
+const { src, alt, sizes, id, class: cls, par, eager = false } = Astro.props;
+const widths = [480, 720, 960, 1280, src.width].filter((w, i, a) => w <= src.width && a.indexOf(w) === i);
+---
+<figure class:list={['win', cls, { par: par !== undefined }]} id={id} data-par={par}>
+  <div class="win-bar" aria-hidden="true">
+    <span class="t"><img src="/app-icon.svg" alt="" width="14" height="14" />YTS Player</span>
+    <span class="win-ctl"><i><Icon name="min" /></i><i><Icon name="max" /></i><i><Icon name="x" /></i></span>
+  </div>
+  <Picture
+    src={src}
+    alt={alt}
+    widths={widths}
+    sizes={sizes}
+    formats={['avif']}
+    fallbackFormat="webp"
+    class="shot"
+    loading={eager ? 'eager' : 'lazy'}
+    fetchpriority={eager ? 'high' : 'auto'}
+    decoding={eager ? 'sync' : 'async'}
+  />
+</figure>

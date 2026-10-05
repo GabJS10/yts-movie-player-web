@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YTS Player · Dale a play y en segundos ya la estás viendo</title>
+<meta name="description" content="App de escritorio para Linux y Windows: explora el catálogo de YTS como en Netflix y mira cualquier película mientras se descarga, con subtítulos en español automáticos.">
+<meta name="theme-color" content="#171717">
+<link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/inicio.png" as="image">
+<style>
+@font-face { font-family: "Archivo"; font-style: normal; font-weight: 300 900; font-stretch: 62% 125%; font-display: swap;
+  src: url(assets/fonts/archivo-latin-ext.woff2) format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Archivo"; font-style: normal; font-weight: 300 900; font-stretch: 62% 125%; font-display: swap;
+  src: url(assets/fonts/archivo-latin.woff2) format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+:root {
+  --ground: #171717; --surface: #1d1d1d; --raised: #2f2f2f;
+  --line: #333333; --line-hi: #4a4a4a;
+  --text: #ffffff; --text-2: #c9c9c9; --muted: #919191; --faint: #6b6b6b;
+  --green: #6ac045; --green-hi: #75c74e; --on-green: #0b1606; --green-wash: rgba(106,192,69,.12);
+  --warn: #e3b341;
+  --gutter: clamp(16px, 4vw, 56px);
+  --font: "Archivo", Arimo, system-ui, sans-serif;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: 88px; }
+body {
+  margin: 0; background: var(--ground); color: var(--text);
+  font: 400 15px/1.5 var(--font); font-synthesis: none;
+  -webkit-font-smoothing: antialiased; overflow-x: clip;
+}
+img, svg { display: block; max-width: 100%; }
+img { height: auto; }
+a { color: inherit; }
+::selection { background: var(--green); color: var(--on-green); }
+:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 4px; }
+html { scrollbar-color: var(--line-hi) var(--ground); }
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: var(--ground); }
+::-webkit-scrollbar-thumb { background: var(--line-hi); border: 3px solid var(--ground); border-radius: 9999px; }
+.tnum { font-variant-numeric: tabular-nums; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.wrap { padding-inline: var(--gutter); max-width: 1680px; margin-inline: auto; }
+
+/* ---------- type roles ---------- */
+.display, .headline, .numeral { font-stretch: 72%; font-weight: 850; text-transform: uppercase; text-wrap: balance; margin: 0; }
+.display { font-size: clamp(3rem, 6.4vw, 6rem); line-height: .9; letter-spacing: -.01em; }
+.headline { font-size: clamp(2rem, 3.4vw, 3rem); line-height: 1; letter-spacing: .005em; font-stretch: 75%; }
+.lead { font-size: 16.5px; line-height: 1.6; color: var(--text-2); max-width: 54ch; margin: 0; }
+.body { font-size: 15.5px; line-height: 1.6; color: var(--text-2); max-width: 52ch; margin: 0; }
+.label { font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- buttons ---------- */
+.btn {
+  --h: 48px; display: inline-flex; align-items: center; gap: 10px; height: var(--h);
+  padding: 0 26px 0 22px; border-radius: 4px; border: 0; cursor: pointer;
+  font: 700 16px/1 var(--font); text-decoration: none; white-space: nowrap;
+  transition: background-color .18s var(--ease), box-shadow .18s var(--ease), transform .18s var(--ease), color .18s;
+}
+.btn svg { width: 22px; height: 22px; flex: none; }
+.btn:active { transform: scale(.97); }
+.btn-play { background: var(--green); color: var(--on-green); }
+.btn-play:hover { background: var(--green-hi); }
+.btn-line { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px var(--line-hi); }
+.btn-line:hover { box-shadow: inset 0 0 0 1px var(--text-2); }
+.btn-sm { --h: 36px; padding: 0 14px; font-size: 14px; gap: 8px; }
+.btn-sm svg { width: 18px; height: 18px; }
+
+.select {
+  appearance: none; height: 48px; border-radius: 4px; border: 1px solid var(--line-hi);
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23c9c9c9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E") no-repeat right 12px center;
+  color: var(--text); font: 600 14px var(--font); padding: 0 36px 0 14px; cursor: pointer;
+}
+.select:hover { border-color: var(--muted); }
+.select:focus-visible { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px var(--green-wash); }
+
+/* ---------- top bar ---------- */
+.top {
+  position: fixed; inset: 0 0 auto; z-index: 50; height: 64px;
+  display: flex; align-items: center; gap: 32px; padding-inline: var(--gutter);
+  background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,0));
+  transition: background-color .3s, box-shadow .3s;
+}
+.top.solid { background: var(--ground); box-shadow: 0 1px 0 var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.brand img { width: 30px; height: 30px; }
+.brand b { font-weight: 900; font-stretch: 75%; font-size: 22px; letter-spacing: .01em; text-transform: uppercase; }
+.brand span { font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--text-2); }
+.nav { display: flex; gap: 4px; margin-left: 8px; }
+.nav a { padding: 8px 12px; border-radius: 4px; text-decoration: none; color: var(--text-2); font-size: 14px; font-weight: 500; transition: color .15s; }
+.nav a:hover { color: var(--text); }
+.top .btn { margin-left: auto; }
+
+/* ---------- hero ---------- */
+.hero {
+  position: relative;
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; gap: clamp(24px, 3vw, 56px);
+  padding: 104px 0 24px var(--gutter);
+  overflow: clip;
+}
+.hero-copy { position: relative; z-index: 2; max-width: 640px; }
+.hero h1 { margin-bottom: 28px; font-size: clamp(3rem, 5.6vw, 5.5rem); }
+.hero h1 .ln { display: block; overflow: clip; padding: .14em 0 .04em; margin-top: -.14em; }
+.hero h1 .ln > span { display: inline-block; }
+.hero .lead { margin-bottom: 32px; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.cta .btn-play { min-width: 0; }
+.alt { display: inline-flex; align-items: center; gap: 6px; height: 48px; padding: 0 6px; color: var(--text-2); font-weight: 600; font-size: 15px; text-decoration: none; }
+.alt svg { width: 18px; height: 18px; transition: transform .3s var(--ease); }
+.alt:hover { color: var(--text); }
+.alt:hover svg { transform: translateX(4px); }
+.pkg { display: none; }
+.pkg.on { display: inline-block; }
+.meta { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--faint); }
+.os-note { margin: 14px 0 0; font-size: 13.5px; color: var(--muted); }
+.os-note[hidden] { display: none; }
+
+.hero-stage { position: relative; perspective: 1800px; margin-right: calc(var(--gutter) * -1 - 6vw); }
+.win {
+  margin: 0; border-radius: 8px; overflow: hidden; background: var(--surface);
+  box-shadow: 0 0 0 1px var(--line-hi), 0 30px 80px rgba(0,0,0,.7);
+  transform-origin: 0% 50%;
+}
+.win-bar { height: 34px; display: flex; align-items: center; justify-content: center; position: relative; background: #202020; border-bottom: 1px solid #0f0f0f; }
+.win-bar .t { font-size: 12.5px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+.win-bar .t img { width: 14px; height: 14px; }
+.win-ctl { position: absolute; right: 4px; top: 0; height: 100%; display: flex; }
+.win-ctl i { width: 40px; display: grid; place-items: center; color: var(--muted); }
+.win-ctl svg { width: 12px; height: 12px; }
+.win img.shot { width: 100%; height: auto; aspect-ratio: 16 / 10; }
+.hero .win { transform: rotateY(-9deg) rotateX(3deg) translateZ(0); transition: transform .9s var(--ease); }
+
+/* ---------- the clock ---------- */
+.clock { position: relative; z-index: 3; }
+.clock-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(24px, 3vw, 56px); }
+.dial { position: sticky; top: 64px; height: calc(100svh - 64px); display: flex; flex-direction: column; justify-content: flex-start; padding-top: 4vh; }
+.tc {
+  font-weight: 850; font-stretch: 72%; font-variant-numeric: tabular-nums; line-height: .8;
+  font-size: clamp(6rem, 13.5vw, 14rem); letter-spacing: -.02em; color: var(--faint); margin: 0;
+  transition: color .4s var(--ease);
+}
+.tc .on { color: var(--text); }
+.tc .colon { color: var(--green); }
+.ticks { display: grid; grid-template-columns: repeat(30, 1fr); gap: 3px; margin: 26px 0 18px; max-width: 520px; }
+.ticks i { height: 14px; border-radius: 2px; box-shadow: inset 0 0 0 1px var(--line-hi); transition: background-color .25s, box-shadow .25s; }
+.ticks i.held { background: var(--green); box-shadow: none; }
+.ticks i:nth-child(5n) { height: 22px; align-self: end; }
+.dial-now { display: flex; gap: 12px; align-items: baseline; min-height: 24px; }
+.dial-now strong { font-size: 17px; font-weight: 700; }
+.dial-fine { margin-top: 28px; font-size: 13px; color: var(--muted); max-width: 40ch; }
+
+.scenes { padding: 4vh 0 4vh; }
+.scene { min-height: 80svh; display: flex; flex-direction: column; justify-content: center; gap: 22px; padding: 6vh 0; }
+.demo { margin-top: 18px; position: relative; min-width: 0; }
+
+/* reveal (JS adds .js to html) */
+.js .rv { opacity: 0; transform: translateY(28px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+.js .rv.in { opacity: 1; transform: none; }
+.js .rv.d1 { transition-delay: .08s; } .js .rv.d2 { transition-delay: .16s; } .js .rv.d3 { transition-delay: .24s; }
+
+/* scene 1: personalised rows (recreation) */
+.home { display: grid; grid-template-columns: minmax(0, 1fr); gap: 30px; min-width: 0; }
+.home-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 12px; }
+.home-head b { font-size: 18px; font-weight: 750; }
+.home-head span { font-size: 13px; color: var(--muted); }
+.home-track { display: grid; grid-auto-flow: column; grid-auto-columns: clamp(118px, 10.4vw, 150px); gap: 8px; padding: 14px 12px 18px; margin: -14px -12px -18px; overflow: hidden; min-width: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 82%, transparent); mask-image: linear-gradient(90deg, #000 82%, transparent); }
+.pc {
+  position: relative; aspect-ratio: 2 / 3; border-radius: 4px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line);
+  padding: 12px; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; overflow: hidden; cursor: default;
+  transition: transform .35s var(--ease), box-shadow .35s var(--ease), background-color .35s;
+}
+.pc::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(255,255,255,.025) 7px 8px); }
+.pc:hover, .pc:focus-visible { transform: scale(1.07); background: #232323; box-shadow: inset 0 0 0 1px var(--line-hi), 0 14px 30px rgba(0,0,0,.6); z-index: 2; }
+.pc-q { position: absolute; top: 10px; left: 10px; height: 20px; padding: 0 6px; display: inline-flex; align-items: center; border-radius: 2px; font-size: 11px; font-weight: 700; color: var(--text-2); background: rgba(23,23,23,.7); box-shadow: inset 0 0 0 1px var(--line-hi); }
+.pc-fav { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: var(--on-green); display: grid; place-items: center; }
+.pc-fav svg { width: 12px; height: 12px; }
+.pc-t { position: relative; font-size: clamp(20px, 1.9vw, 26px); font-weight: 850; font-stretch: 72%; line-height: .92; text-transform: uppercase; text-wrap: balance; transition: color .3s; color: var(--text-2); }
+.pc:hover .pc-t, .pc:focus-visible .pc-t { color: var(--text); }
+.pc-m { position: relative; display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); }
+.pc-m svg { width: 12px; height: 12px; color: var(--green); }
+.js .home .pc { opacity: 0; transform: translateX(40px); }
+.js .home .live-in .pc, .js .live .home .pc { opacity: 1; transform: none; transition: opacity .7s var(--ease), transform .7s var(--ease), box-shadow .35s var(--ease), background-color .35s; }
+.js .live .home .pc:hover, .js .live .home .pc:focus-visible { transform: scale(1.07); }
+
+/* parallax windows */
+.par { will-change: transform; }
+.demo-win .win { max-width: 760px; }
+
+/* scene 3: release timetable */
+.version { display: grid; grid-template-columns: 1fr; position: relative; }
+.version .win { width: 78%; opacity: .55; }
+.tt {
+  position: relative; margin: -22% 0 0 auto; width: min(100%, 640px); background: rgba(29,29,29,.97);
+  border-radius: 8px; box-shadow: 0 0 0 1px var(--line), 0 24px 48px rgba(0,0,0,.6); padding: 6px 0;
+}
+.tt-head, .tt-row { display: grid; grid-template-columns: 44px 76px 1fr 84px 92px; align-items: center; padding: 0 18px; }
+.tt-head { height: 40px; border-bottom: 1px solid var(--line); }
+.tt-head span { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.tt-head .r, .tt-row .r { text-align: right; justify-self: end; }
+.tt-row { height: 54px; width: 100%; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--text-2); font: 400 14px var(--font); text-align: left; cursor: pointer; font-variant-numeric: tabular-nums; transition: background-color .2s; }
+.tt-row:last-child { border-bottom: 0; }
+.tt-row:hover { background: rgba(255,255,255,.035); }
+.tt-row[aria-checked="true"] { background: var(--green-wash); }
+.tt-row:focus-visible { outline-offset: -2px; border-radius: 0; }
+.radio { width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line-hi); display: grid; place-items: center; transition: box-shadow .2s; }
+.radio::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green); transform: scale(0); transition: transform .3s var(--ease); }
+.tt-row[aria-checked="true"] .radio { box-shadow: inset 0 0 0 1.5px var(--green); }
+.tt-row[aria-checked="true"] .radio::after { transform: scale(1); }
+.tt-row .q { color: var(--text); font-weight: 850; font-size: 16px; }
+.tt-row .src { display: flex; flex-direction: column; line-height: 1.25; }
+.tt-row .src small { font-size: 12px; color: var(--warn); display: flex; gap: 5px; align-items: center; }
+.tt-row .src small svg { width: 12px; height: 12px; }
+.sig { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
+.sig i { width: 4px; border-radius: 1px; background: var(--green); }
+.sig i:nth-child(1) { height: 30%; } .sig i:nth-child(2) { height: 47%; } .sig i:nth-child(3) { height: 64%; } .sig i:nth-child(4) { height: 82%; } .sig i:nth-child(5) { height: 100%; }
+.sig i.off { background: transparent; box-shadow: inset 0 0 0 1px var(--faint); }
+.sig-cell { display: inline-flex; gap: 8px; align-items: center; justify-content: flex-end; }
+
+/* plate */
+.plate { display: inline-flex; height: 24px; border: 1px solid var(--line-hi); border-radius: 3px; font-size: 12px; font-weight: 600; letter-spacing: .02em; font-variant-numeric: tabular-nums; color: var(--text-2); overflow: hidden; }
+.plate span { padding: 0 8px; display: flex; align-items: center; }
+.plate span + span { border-left: 1px solid var(--line-hi); }
+.plate span:first-child { color: var(--text); font-weight: 800; }
+.plate.go { border-color: var(--green); }
+.plate.go span + span { border-color: var(--green); }
+.plate.go span:first-child { color: var(--green); }
+
+/* scene 4: buffer (recreation) */
+.buf { border-radius: 8px; background: #111; box-shadow: 0 0 0 1px var(--line); padding: clamp(14px, 3vw, 40px); }
+.buf-panel { max-width: 640px; margin-inline: auto; }
+.buf-title { font-size: clamp(1.4rem, 2.4vw, 2.1rem); font-weight: 850; font-stretch: 72%; text-transform: uppercase; line-height: .95; margin: 0 0 10px; }
+.buf-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.phase { display: flex; align-items: center; gap: 10px; margin: 16px 0 12px; font-size: 14px; color: var(--text-2); }
+.phase i { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 rgba(106,192,69,.5); animation: pulse 1.6s var(--ease) infinite; }
+@keyframes pulse { 70% { box-shadow: 0 0 0 9px rgba(106,192,69,0); } 100% { box-shadow: 0 0 0 0 rgba(106,192,69,0); } }
+.pieces { display: grid; grid-template-columns: repeat(40, 1fr); gap: 2px; }
+.pieces i { aspect-ratio: 1; border-radius: 1px; box-shadow: inset 0 0 0 1px #3a3a3a; transition: background-color .2s, box-shadow .2s; }
+.pieces i.want { box-shadow: inset 0 0 0 1px var(--green); }
+.pieces i.held { background: var(--green); box-shadow: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 9px; height: 9px; border-radius: 1px; }
+.lg-held { background: var(--green); } .lg-want { box-shadow: inset 0 0 0 1px var(--green); } .lg-wait { box-shadow: inset 0 0 0 1px #3a3a3a; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 16px; border-top: 1px solid var(--line); }
+.stats div { padding-top: 12px; }
+.stats div + div { padding-left: 14px; border-left: 1px solid var(--line); margin-left: 14px; }
+.stats b { display: block; font-size: clamp(20px, 2.2vw, 28px); font-weight: 800; font-stretch: 85%; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stats b small { font-size: 12px; font-weight: 600; color: var(--muted); margin-left: 3px; font-stretch: 100%; }
+
+/* scene 5: player with subtitles */
+.player { position: relative; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: radial-gradient(ellipse 70% 60% at 50% 42%, #1c1c1c, #050505 70%); box-shadow: 0 0 0 1px var(--line); }
+.ptop { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; align-items: center; gap: 12px; padding: 16px 18px; background: linear-gradient(rgba(0,0,0,.7), transparent); }
+.ptitle { font-size: 16px; font-weight: 800; font-stretch: 85%; }
+.pmenu { position: absolute; top: 56px; right: 16px; z-index: 4; width: 250px; padding: 12px 0 8px; border-radius: 8px; background: rgba(29,29,29,.97); box-shadow: 0 0 0 1px var(--line), 0 18px 40px rgba(0,0,0,.6); }
+.pmenu .label { margin: 0 0 6px; padding: 0 14px; }
+.pm-row { margin: 0; height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 14px 0 38px; font-size: 14px; color: var(--text-2); }
+.pm-row.on { color: var(--text); font-weight: 600; padding-left: 14px; }
+.pm-row svg { width: 14px; height: 14px; color: var(--green); }
+.pm-row em { font-style: normal; font-size: 12px; color: var(--muted); font-weight: 400; margin-left: auto; }
+.pm-delay { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 6px; padding: 10px 14px 4px; border-top: 1px solid var(--line); font-size: 13.5px; color: var(--text-2); }
+.pm-ctl { display: inline-flex; align-items: center; gap: 8px; }
+.pm-ctl kbd { min-width: 26px; height: 26px; }
+.pm-ctl b { min-width: 46px; text-align: center; font-weight: 700; color: var(--text); }
+.pctl { display: inline-flex; align-items: center; gap: 14px; }
+.pctl > svg { width: 20px; height: 20px; color: var(--text); }
+.player::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,.85), transparent 38%); pointer-events: none; }
+.subs { position: absolute; left: 0; right: 0; bottom: 21%; z-index: 2; text-align: center; padding: 0 8%; display: grid; }
+.subs p { grid-area: 1/1; margin: 0; font-size: clamp(16px, 2.1vw, 28px); font-weight: 600; line-height: 1.3; text-shadow: 0 0 2px #000, 0 1px 3px #000, 0 2px 12px rgba(0,0,0,.8); opacity: 0; transform: translateY(6px); transition: opacity .35s var(--ease), transform .35s var(--ease); }
+.subs p.cur { opacity: 1; transform: none; transition-delay: .3s; }
+.pchrome { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; padding: 0 18px 14px; }
+.rail { position: relative; height: 4px; border-radius: 2px; background: rgba(255,255,255,.22); margin-bottom: 10px; }
+.rail .bufd { position: absolute; inset: 0 auto 0 0; width: 46%; background: rgba(255,255,255,.55); border-radius: 2px; }
+.rail .played { position: absolute; inset: 0; background: var(--green); border-radius: 2px; transform-origin: left; transform: scaleX(.1); transition: transform .6s linear; }
+.prow { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 3px; border: 1px solid var(--green); color: var(--text); font-size: 12.5px; font-weight: 600; background: rgba(0,0,0,.4); }
+.chip svg { width: 14px; height: 14px; color: var(--green); }
+
+/* scene 6: continue + offline */
+.after { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; align-items: end; }
+.cont { position: relative; border-radius: 4px; overflow: hidden; background: var(--surface); transition: transform .35s var(--ease), box-shadow .35s var(--ease); }
+.cont:hover { transform: scale(1.04); box-shadow: 0 14px 30px rgba(0,0,0,.6); }
+.cont img { width: 100%; aspect-ratio: 16/9; object-fit: cover; object-position: 75% 30%; }
+.cont::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,.9), transparent 60%); }
+.cont-txt { position: absolute; left: 14px; right: 14px; bottom: 16px; z-index: 1; }
+.cont-txt b { display: block; font-size: 17px; font-weight: 800; font-stretch: 85%; }
+.cont-txt span { font-size: 12.5px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.cont-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255,255,255,.2); z-index: 1; }
+.cont-bar i { display: block; height: 100%; background: var(--green); transform-origin: left; transform: scaleX(0); transition: transform 1.4s var(--ease); }
+.live .cont-bar i { transform: scaleX(.55); }
+.cont-play { position: absolute; inset: 0; margin: auto; width: 54px; height: 54px; border-radius: 50%; box-shadow: inset 0 0 0 2px #fff; display: grid; place-items: center; z-index: 1; opacity: 0; transition: opacity .25s; }
+.cont:hover .cont-play { opacity: 1; }
+.cont-play svg { width: 22px; height: 22px; margin-left: 3px; }
+.dl { border-top: 1px solid var(--line); }
+.dl-row { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.dl-top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; font-size: 14px; }
+.dl-top b { font-weight: 700; }
+.dl-top span { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 13px; }
+.dl-bar { height: 4px; border-radius: 2px; background: var(--raised); margin-top: 10px; overflow: hidden; }
+.dl-bar i { display: block; height: 100%; background: var(--green); transform-origin: left; transform: scaleX(0); transition: transform 2.4s var(--ease-in-out); }
+.live .dl-bar i { transform: scaleX(var(--to)); }
+.dl-state { margin-top: 8px; font-size: 12.5px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+.dl-state svg { width: 14px; height: 14px; color: var(--green); }
+
+/* finale */
+.finale { min-height: 56svh; display: flex; flex-direction: column; justify-content: center; gap: 28px; }
+.finale-fine { margin: 0; font-size: 13px; color: var(--muted); max-width: 48ch; }
+@media (min-width: 901px) { .finale-fine { display: none; } }
+.finale .display { font-size: clamp(3rem, 7vw, 7rem); }
+
+/* ---------- extras: ruled list with expressive hover ---------- */
+.band { padding-block: clamp(64px, 8vw, 112px); }
+.band + .band { padding-top: 0; }
+.band-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 40px; flex-wrap: wrap; }
+.extras { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.ex {
+  position: relative; display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 24px; align-items: center;
+  padding: 26px 0; border-bottom: 1px solid var(--line); cursor: default; isolation: isolate;
+}
+.ex::before { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--green); transform: scaleX(0); transform-origin: left; transition: transform .6s var(--ease); }
+.ex::after { content: ""; position: absolute; inset: 0; background: rgba(255,255,255,.025); opacity: 0; transition: opacity .3s; z-index: -1; }
+.ex:hover::before { transform: scaleX(1); }
+.ex:hover::after { opacity: 1; }
+.ex-word {
+  font-size: clamp(2.6rem, 6.4vw, 6rem); font-weight: 850; font-stretch: 62%; line-height: .9; text-transform: uppercase;
+  color: var(--text-2); transition: font-stretch .7s var(--ease), color .4s, letter-spacing .7s var(--ease);
+}
+.ex:hover .ex-word { font-stretch: 100%; color: var(--text); }
+.ex-side { display: flex; flex-direction: column; gap: 12px; }
+.ex-side p { margin: 0; color: var(--text-2); font-size: 15.5px; line-height: 1.6; max-width: 46ch; }
+.keys { display: flex; gap: 6px; flex-wrap: wrap; }
+kbd { display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 8px; border-radius: 3px; border: 1px solid var(--line-hi); border-bottom-width: 3px; font: 700 12.5px var(--font); color: var(--text); background: var(--surface); transition: transform .25s var(--ease), border-color .25s; }
+.ex:hover kbd { border-color: var(--muted); }
+.ex:hover kbd:nth-child(1) { transform: translateY(2px); transition-delay: 0s; }
+.ex:hover kbd:nth-child(2) { transform: translateY(2px); transition-delay: .07s; }
+.ex:hover kbd:nth-child(3) { transform: translateY(2px); transition-delay: .14s; }
+.ex:hover kbd:nth-child(4) { transform: translateY(2px); transition-delay: .21s; }
+.ex:hover kbd:nth-child(5) { transform: translateY(2px); transition-delay: .28s; }
+
+/* ---------- downloads ---------- */
+.dlt { border-top: 1px solid var(--line); }
+.dlt-row { display: grid; grid-template-columns: 44px minmax(0, 2.2fr) minmax(0, 1.4fr) auto; gap: 16px; align-items: center; min-height: 76px; padding: 12px 18px; border-bottom: 1px solid var(--line); transition: background-color .2s; }
+.dlt-row:hover { background: rgba(255,255,255,.035); }
+.dlt-row.mine { background: var(--green-wash); }
+.dlt-row.mine .radio { box-shadow: inset 0 0 0 1.5px var(--green); }
+.dlt-row.mine .radio::after { transform: scale(1); }
+.dlt-os b { display: block; font-size: 18px; font-weight: 850; font-stretch: 85%; text-transform: uppercase; letter-spacing: .01em; }
+.dlt-os span { font-size: 13.5px; color: var(--muted); }
+.dlt-file code { font: 500 13px ui-monospace, "JetBrains Mono", monospace; color: var(--text-2); word-break: break-all; }
+.dlt-row .here { display: none; font-size: 12px; font-weight: 600; color: var(--green); margin-left: 8px; letter-spacing: .02em; }
+.dlt-row.mine .here { display: inline; }
+.dlt-row.mine .btn-line { background: var(--green); color: var(--on-green); box-shadow: none; }
+.dlt-row.mine .btn-line:hover { background: var(--green-hi); }
+.dl-foot { display: flex; flex-wrap: wrap; gap: 12px 28px; margin-top: 22px; color: var(--muted); font-size: 14px; }
+.dl-foot a { color: var(--text-2); text-underline-offset: 3px; text-decoration-color: var(--line-hi); }
+.dl-foot a:hover { color: var(--text); text-decoration-color: var(--green); }
+
+/* ---------- FAQ ---------- */
+.faq { border-top: 1px solid var(--line); max-width: 920px; }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 22px 0; font-size: 18px; font-weight: 700; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary svg { width: 20px; height: 20px; flex: none; color: var(--muted); transition: transform .35s var(--ease), color .2s; }
+.faq summary:hover svg { color: var(--text); }
+.faq details[open] summary svg { transform: rotate(45deg); color: var(--green); }
+.faq details p { margin: 0 0 24px; color: var(--text-2); font-size: 15.5px; line-height: 1.6; max-width: 68ch; }
+.faq a { color: var(--green); text-underline-offset: 3px; }
+
+/* ---------- legal + footer ---------- */
+.legal { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 7fr); gap: 24px; padding: 40px 0; border-top: 1px solid var(--line); }
+.legal h2 { font-size: 20px; font-weight: 750; margin: 0; }
+.legal p { margin: 0 0 12px; color: var(--text-2); font-size: 14.5px; line-height: 1.6; max-width: 72ch; }
+.legal a { color: var(--text); text-underline-offset: 3px; text-decoration-color: var(--green); }
+footer { border-top: 1px solid var(--line); padding: 28px 0 40px; }
+.foot { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center; justify-content: space-between; }
+.foot nav { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.foot a { color: var(--text-2); text-decoration: none; font-size: 14px; }
+.foot a:hover { color: var(--text); }
+.foot small { color: var(--muted); font-size: 13px; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+  .tt-head, .tt-row { grid-template-columns: 40px 68px 1fr 76px 84px; padding: 0 14px; }
+}
+@media (max-width: 900px) {
+  .nav { display: none; }
+  .pmenu { width: 220px; }
+  .hero { grid-template-columns: 1fr; padding: 104px var(--gutter) 96px; min-height: 0; gap: 48px; }
+  .hero-stage { margin-right: 0; }
+  .hero .win { transform: rotateX(4deg); }
+  .clock { margin-top: 0; }
+  .clock-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .dial { top: 64px; height: auto; z-index: 5; flex-direction: row; align-items: center; gap: 16px; padding: 10px 0; background: var(--ground); box-shadow: 0 1px 0 var(--line); margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); }
+  .tc { font-size: 34px; line-height: 1; letter-spacing: 0; }
+  .ticks { flex: 1; margin: 0; gap: 2px; }
+  .ticks i { height: 10px; } .ticks i:nth-child(5n) { height: 14px; }
+  .dial-now, .dial-fine { display: none; }
+  .scenes { padding: 4vh 0 6vh; }
+  .scene { min-height: 0; padding: 64px 0; }
+  .after { grid-template-columns: 1fr; }
+  .version .win { width: 100%; }
+  .tt { margin-top: -12%; }
+  .ex { grid-template-columns: 1fr; gap: 12px; }
+  .legal { grid-template-columns: 1fr; }
+  .dlt-row { grid-template-columns: 32px minmax(0, 1fr) auto; }
+  .dlt-file { grid-column: 2 / 4; grid-row: 2; }
+}
+@media (max-width: 560px) {
+  .btn { --h: 44px; }
+  .top .btn span { display: none; }
+  .top .btn { padding: 0 10px; }
+  .tt-head { display: none; }
+  .tt-head, .tt-row { grid-template-columns: 30px 58px 1fr 60px; padding: 0 12px; }
+  .tt-row .sz { display: none; }
+  .tt-row .sig-cell .n { display: none; }
+  .player { aspect-ratio: 4 / 3; }
+  .pmenu { display: none; }
+  .ptop { padding: 12px 14px; } .ptop .plate { display: none; }
+  .phase { margin-top: 10px; }
+  .pieces { grid-template-columns: repeat(24, 1fr); }
+  .pieces i:nth-child(n+97) { display: none; }
+  .stats b { font-size: 18px; }
+  .pctl > svg:nth-child(2), .pctl > svg:last-child { display: none; }
+  .prow { font-size: 12px; } .chip { height: 24px; padding: 0 8px; font-size: 11.5px; }
+  .dlt-row { grid-template-columns: 26px minmax(0, 1fr); padding: 14px 12px; }
+  .dlt-row .btn { grid-column: 2; grid-row: 3; justify-self: start; }
+  .dlt-file { grid-column: 2; }
+  .cta .btn-play { flex: 1 1 auto; justify-content: center; }
+}
+
+/* ---------- reduced motion: everything visible, nothing travels ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0s !important; }
+  .js .rv { opacity: 1; transform: none; }
+  .js .home .pc { opacity: 1; transform: none; }
+  .hero .win { transform: none !important; }
+  .par { transform: none !important; }
+  .hero h1 .ln > span { transform: none !important; }
+}
+
+/* load choreography (only with motion) */
+@media (prefers-reduced-motion: no-preference) {
+  .js .hero h1 .ln > span { transform: translateY(105%); animation: rise 1s var(--ease) forwards; }
+  .js .hero h1 .ln:nth-child(2) > span { animation-delay: .08s; }
+  .js .hero h1 .ln:nth-child(3) > span { animation-delay: .16s; }
+  .js .hero h1 .ln:nth-child(4) > span { animation-delay: .24s; }
+  .js .hero .lead, .js .hero .cta, .js .hero .meta { opacity: 0; animation: fade .9s var(--ease) .45s forwards; }
+  .js .hero .cta { animation-delay: .55s; } .js .hero .meta { animation-delay: .65s; }
+  .js .hero .win { animation: settle 1.6s var(--ease) .1s both; }
+  @keyframes rise { to { transform: none; } }
+  @keyframes fade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes settle { from { transform: rotateY(-28deg) rotateX(8deg) translate3d(14%, 4%, -120px); opacity: 0; } 30% { opacity: 1; } }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-dl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5Z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17.5v.01"/></symbol>
+  <symbol id="i-cc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 10.5a2 2 0 1 0 0 3M16.5 10.5a2 2 0 1 0 0 3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2.8 2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8Z"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-8-4.6-8-10.6A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 8 2.6c0 6-8 10.6-8 10.6Z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5v14l-4.5-4.5H4Z"/><path d="M15.5 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></symbol>
+  <symbol id="i-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-min" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 6.5h8"/></symbol>
+  <symbol id="i-max" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2.5" y="2.5" width="7" height="7"/></symbol>
+  <symbol id="i-x" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><path d="m2.5 2.5 7 7M9.5 2.5l-7 7"/></symbol>
+</svg>
+
+<header class="top" id="top">
+  <a class="brand" href="#" aria-label="YTS Player, inicio"><img src="assets/app-icon.svg" alt="" width="30" height="30"><b>YTS</b><span>Player</span></a>
+  <nav class="nav" aria-label="Principal">
+    <a href="#descargas">Descargar</a>
+    <a href="#">Documentación</a>
+    <a href="#">Novedades</a>
+    <a href="https://github.com/GabJS10/yts-movie-player">GitHub</a>
+  </nav>
+  <a class="btn btn-line btn-sm" href="#descargas"><svg aria-hidden="true"><use href="#i-dl"/></svg><span>Descargar</span></a>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="h1">
+    <div class="hero-copy">
+      <h1 class="display" id="h1">
+        <span class="ln"><span>Dale a play</span></span>
+        <span class="ln"><span>y en segundos</span></span>
+        <span class="ln"><span>ya la estás</span></span>
+        <span class="ln"><span>viendo</span></span>
+      </h1>
+      <p class="lead">Una app de escritorio para Windows y Linux: el catálogo de YTS como en Netflix, la película empieza mientras se descarga y los subtítulos en español se ponen solos.</p>
+      <div class="cta">
+        <a class="btn btn-play" id="dl-main" href="#descargas"><svg aria-hidden="true"><use href="#i-dl"/></svg><span id="dl-main-label">Descargar</span></a>
+        <label class="sr" for="pkg">Paquete de Linux</label>
+        <select class="select pkg" id="pkg">
+          <option value="deb">.deb</option>
+          <option value="rpm">.rpm</option>
+          <option value="appimage">AppImage</option>
+        </select>
+        <a class="alt" href="#descargas">Otras plataformas<svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+      <p class="os-note" id="os-note" hidden></p>
+      <div class="meta label">
+        <span class="tnum">v1.1.0 · 5 oct 2026</span><i class="dot"></i><span>Windows 10/11</span><i class="dot"></i><span>Linux</span><i class="dot"></i><span>Código abierto · MIT</span>
+      </div>
+    </div>
+    <div class="hero-stage">
+      <figure class="win" id="hero-win">
+        <div class="win-bar" aria-hidden="true">
+          <span class="t"><img src="assets/app-icon.svg" alt="">YTS Player</span>
+          <span class="win-ctl"><i><svg><use href="#i-min"/></svg></i><i><svg><use href="#i-max"/></svg></i><i><svg><use href="#i-x"/></svg></i></span>
+        </div>
+        <img class="shot" src="assets/inicio.png" width="1440" height="900" alt="Inicio de YTS Player: banner con una película recomendada, sus datos de versión y los botones Reproducir y Más info; debajo, la fila Tendencias en YTS.">
+      </figure>
+    </div>
+  </section>
+
+  <!-- THE CLOCK -->
+  <section class="clock" id="reloj" aria-label="De abrir la app a ver la película">
+    <div class="wrap clock-grid">
+      <div class="dial" aria-hidden="true">
+        <p class="tc" id="tc"><span id="tc-m">00</span><span class="colon">:</span><span id="tc-s">00</span></p>
+        <div class="ticks" id="ticks"></div>
+        <div class="dial-now"><span class="label">Ahora</span><strong id="now">Abres la app</strong></div>
+        <p class="dial-fine">Tiempos de ejemplo: dependen de tu conexión y de cuánta gente comparte la película.</p>
+      </div>
+
+      <div class="scenes">
+        <article class="scene" data-t="2" data-now="Te recibe">
+          <h2 class="headline rv">Abres la app y ya sabe qué te gusta</h2>
+          <p class="body rv d1">El inicio cambia contigo: recomendaciones según lo que viste, lo que guardaste en tu lista y tus géneros, más filas de tendencias, recientes y mejor valoradas.</p>
+          <div class="demo rv d2">
+            <div class="home" aria-label="Ejemplo de filas personalizadas del inicio">
+              <div class="home-row"><div class="home-head"><b>Porque viste Interstellar</b><span>Ciencia ficción</span></div><div class="home-track"><div class="pc" tabindex="0"><span class="pc-q">1080p</span><b class="pc-t">Ad Astra</b><span class="pc-m tnum"><svg aria-hidden="true"><use href="#i-star"/></svg>6,5 · 2019</span></div><div class="pc" tabindex="0"><span class="pc-q">2160p</span><b class="pc-t">Gravity</b><span class="pc-m tnum"><svg aria-hidden="true"><use href="#i-star"/></svg>7,7 · 2013</span></div><div class="pc" tabindex="0"><span class="pc-q">1080p</span><span class="pc-fav" aria-hidden="true"><svg><use href="#i-heart"/></svg></span><b class="pc-t">The Martian</b><span class="pc-m tnum"><svg aria-hidden="true"><use href="#i-star"/></svg>8,0 · 2015</span></div><div class="pc" tabindex="0"><span class="pc-q">1080p</span><b class="pc-t">Arrival</b><span class="pc-m tnum"><svg aria-hidden="true"><use href="#i-star"/></svg>7,9 · 2016</span></div><div class="pc" tabindex="0"><span class="pc-q">720p</span><b class="pc-t">Contact</b><span class="pc-m tnum"><svg aria-hidden="true"><use href="#i-star"/></svg>7,5 · 1997</span></div></div></div>
+              <div class="home-row"><div class="home-head"><b>Porque está en tu lista</b><span>Animación</span></div><div class="home-track"><div class="pc" tabindex="0"><span class="pc-q">1080p</span><span class="pc-fav" aria-hidden="true"><svg><use href="#i-heart"/></svg></span><b class="pc-t">Coco</b><span class="pc-m tnum"><svg aria-hidden="true"><use href="#i-star"/></svg>8,4 · 2017</span></div><div class="pc" tabindex="0"><span class="pc-q">1080p</span><b class="pc-t">Up</b><span class="pc-m tnum"><svg aria-hidden="true"><use href="#i-star"/></svg>8,3 · 2009</span></div><div class="pc" tabindex="0"><span class="pc-q">2160p</span><b class="pc-t">Soul</b><span class="pc-m tnum"><svg aria-hidden="true"><use href="#i-star"/></svg>8,0 · 2020</span></div><div class="pc" tabindex="0"><span class="pc-q">1080p</span><b class="pc-t">Wall·E</b><span class="pc-m tnum"><svg aria-hidden="true"><use href="#i-star"/></svg>8,4 · 2008</span></div><div class="pc" tabindex="0"><span class="pc-q">1080p</span><b class="pc-t">Big Hero 6</b><span class="pc-m tnum"><svg aria-hidden="true"><use href="#i-star"/></svg>7,8 · 2014</span></div></div></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="scene" data-t="5" data-now="Buscas">
+          <h2 class="headline rv">Encuentra cualquier cosa al escribir</h2>
+          <p class="body rv d1">Busca por título y filtra por género, calidad o valoración. Los filtros siguen ahí cuando vuelves.</p>
+          <div class="demo demo-win rv d2">
+            <figure class="win par" data-par="0.06">
+              <div class="win-bar" aria-hidden="true"><span class="t"><img src="assets/app-icon.svg" alt="">YTS Player</span><span class="win-ctl"><i><svg><use href="#i-min"/></svg></i><i><svg><use href="#i-max"/></svg></i><i><svg><use href="#i-x"/></svg></i></span></div>
+              <img class="shot" src="assets/buscar.png" width="1440" height="900" loading="lazy" alt="Búsqueda de YTS Player: el término matrix con filtros de género, calidad, valoración y orden, y ocho resultados.">
+            </figure>
+          </div>
+        </article>
+
+        <article class="scene" data-t="9" data-now="Eliges versión">
+          <h2 class="headline rv">Eliges versión sabiendo cómo va a ir</h2>
+          <p class="body rv d1">Calidad, tamaño y cuánta gente la comparte, a la vista antes de darle a play. Las barras verdes te dicen si arrancará rápido.</p>
+          <div class="demo version rv d2">
+            <figure class="win par" data-par="-0.04">
+              <div class="win-bar" aria-hidden="true"><span class="t"><img src="assets/app-icon.svg" alt="">YTS Player</span><span class="win-ctl"><i><svg><use href="#i-min"/></svg></i><i><svg><use href="#i-max"/></svg></i><i><svg><use href="#i-x"/></svg></i></span></div>
+              <img class="shot" src="assets/ficha.png" width="1440" height="900" loading="lazy" alt="Ficha de una película en YTS Player con sinopsis, reparto y la tabla Elige versión.">
+            </figure>
+            <div class="tt" role="radiogroup" aria-label="Ejemplo: elige versión" id="tt">
+              <div class="tt-head" aria-hidden="true"><span></span><span>Calidad</span><span>Fuente</span><span class="r">Tamaño</span><span class="r">Enjambre</span></div>
+              <button class="tt-row" role="radio" aria-checked="false"><span class="radio"></span><span class="q">720p</span><span class="src">BluRay · x264</span><span class="r sz">1,3 GB</span><span class="r sig-cell"><span class="sig"><i></i><i></i><i></i><i></i><i></i></span></span></button>
+              <button class="tt-row" role="radio" aria-checked="false" data-pick><span class="radio"></span><span class="q">1080p</span><span class="src">BluRay · x264</span><span class="r sz">2,4 GB</span><span class="r sig-cell"><span class="sig"><i></i><i></i><i></i><i></i><i></i></span></span></button>
+              <button class="tt-row" role="radio" aria-checked="false"><span class="radio"></span><span class="q">1080p</span><span class="src">WEB · x264</span><span class="r sz">2,4 GB</span><span class="r sig-cell"><span class="sig"><i></i><i></i><i></i><i></i><i class="off"></i></span></span></button>
+              <button class="tt-row" role="radio" aria-checked="false"><span class="radio"></span><span class="q">2160p</span><span class="src">BluRay · x265<small><svg aria-hidden="true"><use href="#i-warn"/></svg>Se abre en VLC</small></span><span class="r sz">5,8 GB</span><span class="r sig-cell"><span class="sig"><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i></span></span></button>
+            </div>
+          </div>
+        </article>
+
+        <article class="scene" data-t="14" data-now="Le das a play">
+          <h2 class="headline rv">Empieza mientras se descarga</h2>
+          <p class="body rv d1">No esperas a que baje entera: con unos pocos megas listos, arranca. Y puedes adelantar a cualquier punto de la película.</p>
+          <div class="demo rv d2">
+            <div class="buf" id="buf">
+              <div class="buf-panel">
+                <p class="buf-title">Avengers: Infinity War</p>
+                <div class="buf-row"><span class="plate go"><span>1080p</span><span>BluRay</span><span>x264</span><span>2,4 GB</span></span><span class="sig"><i></i><i></i><i></i><i></i><i></i></span></div>
+                <div class="phase"><i></i><span id="phase">Conectando…</span></div>
+                <div class="pieces" id="pieces"></div>
+                <div class="legend" aria-hidden="true"><span><i class="lg-held"></i>Descargado</span><span><i class="lg-want"></i>Lo siguiente</span><span><i class="lg-wait"></i>Pendiente</span></div>
+                <div class="stats">
+                  <div><span class="label">Peers</span><b id="st-peers">0</b></div>
+                  <div><span class="label">Velocidad</span><b><span id="st-speed">0,0</span><small>MB/s</small></b></div>
+                  <div><span class="label">Listo</span><b><span id="st-mb">0,0</span><small>MB</small></b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="scene" data-t="22" data-now="Lees en español">
+          <h2 class="headline rv">Subtítulos en español, sin buscar nada</h2>
+          <p class="body rv d1">La app los encuentra y elige los que mejor encajan con tu versión. ¿Van adelantados? Ajusta el retraso al vuelo, o arrastra tu propio <span class="tnum">.srt</span>.</p>
+          <div class="demo rv d2">
+            <div class="player" id="player" aria-label="Ejemplo del reproductor con subtítulos en español">
+              <div class="ptop"><span class="ptitle">Avengers: Infinity War</span><span class="plate"><span>1080p</span><span>BluRay</span><span>x264</span></span></div>
+              <div class="pmenu" aria-hidden="true">
+                <p class="label">Subtítulos</p>
+                <p class="pm-row on"><svg><use href="#i-check"/></svg>Español<em>automático</em></p>
+                <p class="pm-row">English</p>
+                <p class="pm-row">Cargar .srt…</p>
+                <div class="pm-delay"><span>Retraso</span><span class="pm-ctl"><kbd>G</kbd><b class="tnum" id="pdelay">0,0 s</b><kbd>H</kbd></span></div>
+              </div>
+              <div class="subs" aria-hidden="true">
+                <p class="cur">—¿Cuánto tiempo nos queda?</p>
+                <p>—El suficiente, si nos vamos ya.</p>
+                <p>—Entonces no mires atrás.</p>
+              </div>
+              <div class="pchrome">
+                <div class="rail"><span class="bufd"></span><span class="played" id="played"></span></div>
+                <div class="prow">
+                  <span class="pctl" aria-hidden="true"><svg><use href="#i-pause"/></svg><svg><use href="#i-vol"/></svg><span id="ptime">1:12:41 / 2:29:00</span></span>
+                  <span class="pctl"><span class="chip"><svg aria-hidden="true"><use href="#i-cc"/></svg>Español · automático</span><svg aria-hidden="true"><use href="#i-full"/></svg></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="scene" data-t="28" data-now="Y mañana sigues">
+          <h2 class="headline rv">Lo dejas, y retoma en el segundo exacto</h2>
+          <p class="body rv d1">Continuar viendo te devuelve a donde ibas. Y si prefieres tenerla sin conexión, descárgala: pausa, reanuda y elige la carpeta.</p>
+          <div class="demo after rv d2" id="after">
+            <div class="cont" tabindex="0" aria-label="Ejemplo de Continuar viendo">
+              <img src="assets/ficha.png" alt="" width="1440" height="900" loading="lazy">
+              <span class="cont-play" aria-hidden="true"><svg><use href="#i-play"/></svg></span>
+              <div class="cont-txt"><b>Avengers: Infinity War</b><span>Quedan 1 h 7 min · 1:22:10 de 2:29:00</span></div>
+              <div class="cont-bar"><i></i></div>
+            </div>
+            <div class="dl">
+              <div class="dl-row"><div class="dl-top"><b>Interstellar</b><span>1080p · 2,1 GB</span></div><div class="dl-bar"><i style="--to:1"></i></div><div class="dl-state"><svg aria-hidden="true"><use href="#i-check"/></svg>En la biblioteca</div></div>
+              <div class="dl-row"><div class="dl-top"><b>Coco</b><span>1080p · 1,8 GB</span></div><div class="dl-bar"><i style="--to:.64"></i></div><div class="dl-state tnum">64 % · 3,2 MB/s</div></div>
+            </div>
+          </div>
+        </article>
+
+        <div class="finale" data-t="30" data-now="Viendo la película">
+          <p class="display rv">Ya la estás viendo.</p>
+          <div class="cta rv d1">
+            <a class="btn btn-play" href="#descargas"><svg aria-hidden="true"><use href="#i-dl"/></svg>Descargar YTS Player</a>
+          </div>
+          <p class="finale-fine rv d2">Los tiempos del reloj son de ejemplo: dependen de tu conexión y de cuánta gente comparte la película.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXTRAS -->
+  <section class="band wrap" aria-labelledby="extras-h">
+    <div class="band-head">
+      <h2 class="headline rv" id="extras-h">Y lo que no se ve en 30 segundos</h2>
+    </div>
+    <ul class="extras">
+      <li class="ex rv"><span class="ex-word">Tráilers</span><div class="ex-side"><p>Ve el tráiler sin salir de la app antes de decidirte.</p></div></li>
+      <li class="ex rv"><span class="ex-word">Teclado</span><div class="ex-side"><p>Todo se maneja sin ratón, y el reproductor tiene sus atajos.</p><div class="keys"><kbd>Espacio</kbd><kbd>←</kbd><kbd>→</kbd><kbd>F</kbd><kbd>M</kbd></div></div></li>
+      <li class="ex rv"><span class="ex-word">Sin conexión</span><div class="ex-side"><p>Sin internet, tu biblioteca descargada sigue a mano.</p></div></li>
+      <li class="ex rv"><span class="ex-word">VLC</span><div class="ex-side"><p>Las versiones que la app no puede reproducir se abren en VLC, con sus subtítulos.</p></div></li>
+      <li class="ex rv"><span class="ex-word">Al día</span><div class="ex-side"><p>La app te avisa cuando sale una versión nueva.</p></div></li>
+    </ul>
+  </section>
+
+  <!-- DOWNLOADS -->
+  <section class="band wrap" id="descargas" aria-labelledby="dl-h">
+    <div class="band-head">
+      <h2 class="headline rv" id="dl-h">Descarga la tuya</h2>
+      <span class="plate rv"><span>v1.1.0</span><span>5 oct 2026</span><span>Windows · Linux</span></span>
+    </div>
+    <div class="dlt" id="dlt">
+      <div class="dlt-row" data-os="win">
+        <span class="radio" aria-hidden="true"></span>
+        <div class="dlt-os"><b>Windows 10 / 11</b><span>Instalador por usuario, sin permisos de administrador</span><span class="here">Tu sistema</span></div>
+        <div class="dlt-file"><code>YTS.Player_1.1.0_x64-setup.exe</code></div>
+        <a class="btn btn-line btn-sm" href="https://github.com/GabJS10/yts-movie-player/releases/download/v1.1.0/YTS.Player_1.1.0_x64-setup.exe"><svg aria-hidden="true"><use href="#i-dl"/></svg>.exe</a>
+      </div>
+      <div class="dlt-row" data-os="deb">
+        <span class="radio" aria-hidden="true"></span>
+        <div class="dlt-os"><b>Ubuntu · Debian · Mint · Pop!_OS</b><span>Instala solo lo necesario para reproducir</span><span class="here">Tu sistema</span></div>
+        <div class="dlt-file"><code>YTS.Player_1.1.0_amd64.deb</code></div>
+        <a class="btn btn-line btn-sm" href="https://github.com/GabJS10/yts-movie-player/releases/download/v1.1.0/YTS.Player_1.1.0_amd64.deb"><svg aria-hidden="true"><use href="#i-dl"/></svg>.deb</a>
+      </div>
+      <div class="dlt-row" data-os="rpm">
+        <span class="radio" aria-hidden="true"></span>
+        <div class="dlt-os"><b>Fedora · openSUSE</b><span>Instala solo lo necesario para reproducir</span><span class="here">Tu sistema</span></div>
+        <div class="dlt-file"><code>YTS.Player-1.1.0-1.x86_64.rpm</code></div>
+        <a class="btn btn-line btn-sm" href="https://github.com/GabJS10/yts-movie-player/releases/download/v1.1.0/YTS.Player-1.1.0-1.x86_64.rpm"><svg aria-hidden="true"><use href="#i-dl"/></svg>.rpm</a>
+      </div>
+      <div class="dlt-row" data-os="appimage">
+        <span class="radio" aria-hidden="true"></span>
+        <div class="dlt-os"><b>Cualquier Linux</b><span>Un solo archivo, sin instalar; trae todo incluido</span><span class="here">Tu sistema</span></div>
+        <div class="dlt-file"><code>YTS.Player_1.1.0_amd64.AppImage</code></div>
+        <a class="btn btn-line btn-sm" href="https://github.com/GabJS10/yts-movie-player/releases/download/v1.1.0/YTS.Player_1.1.0_amd64.AppImage"><svg aria-hidden="true"><use href="#i-dl"/></svg>AppImage</a>
+      </div>
+    </div>
+    <div class="dl-foot">
+      <a href="#">Cómo instalar en cada sistema</a>
+      <a href="#">Qué hay de nuevo en la v1.1.0</a>
+      <a href="https://github.com/GabJS10/yts-movie-player/releases">Todas las versiones en GitHub</a>
+      <span>macOS: todavía no.</span>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="band wrap" aria-labelledby="faq-h" style="padding-top:0">
+    <div class="band-head"><h2 class="headline rv" id="faq-h">Preguntas rápidas</h2></div>
+    <div class="faq">
+      <details><summary>¿Necesito una cuenta?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary><p>Para explorar y ver, no. Para los subtítulos automáticos necesitas una API key gratuita de OpenSubtitles; se pega una vez en Ajustes. <a href="#">Cómo conseguirla</a>.</p></details>
+      <details><summary>Windows dice que “protegió tu PC”. ¿Es normal?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary><p>Sí: el instalador no está firmado, porque un certificado de firma cuesta dinero. Pulsa <strong>Más información → Ejecutar de todas formas</strong>. El código está abierto en GitHub.</p></details>
+      <details><summary>¿Por qué algunas versiones se abren en VLC?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary><p>Algunas versiones 4K usan un formato (x265/HEVC) que la app no siempre puede reproducir. Cuando pasa, te ofrece abrirla en VLC con sus subtítulos, o elegir otra versión.</p></details>
+      <details><summary>¿Hay versión para Mac?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary><p>Todavía no. Por ahora, Windows 10/11 y Linux (.deb, .rpm y AppImage).</p></details>
+      <details><summary>¿Dónde guarda las películas y los ajustes?<svg aria-hidden="true"><use href="#i-plus"/></svg></summary><p>En tu carpeta de usuario, y puedes mover la caché y las descargas al disco que quieras desde Ajustes. <a href="#">Todas las rutas</a>.</p></details>
+    </div>
+  </section>
+
+  <!-- LEGAL -->
+  <section class="wrap" aria-labelledby="legal-h">
+    <div class="legal">
+      <h2 id="legal-h">Aviso legal</h2>
+      <div>
+        <p>YTS Player es solo un cliente: no aloja, sube ni distribuye contenido. Muestra el catálogo público de la API de YTS y usa BitTorrent para descargar lo que tú eliges; mientras descargas, también compartes partes del archivo con otras personas.</p>
+        <p>Gran parte de ese catálogo tiene derechos de autor, y descargarlo o compartirlo puede ser ilegal en tu país. El uso de la app es responsabilidad de quien la usa. Este proyecto no tiene relación con YTS ni con OpenSubtitles. <a href="#">Aviso legal completo</a>.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <div class="foot">
+    <a class="brand" href="#"><img src="assets/app-icon.svg" alt="" width="24" height="24"><b style="font-size:18px">YTS</b><span>Player</span></a>
+    <nav aria-label="Pie">
+      <a href="https://github.com/GabJS10/yts-movie-player">GitHub</a>
+      <a href="#">Novedades</a>
+      <a href="#">Documentación</a>
+      <a href="#">Legal</a>
+    </nav>
+    <small>Código bajo licencia MIT. La licencia cubre la app, no el contenido al que se accede con ella.</small>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const d = document, root = d.documentElement;
+  root.classList.add('js');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- OS detection ---------- */
+  const REL = 'https://github.com/GabJS10/yts-movie-player/releases/download/v1.1.0/';
+  const FILES = { win: 'YTS.Player_1.1.0_x64-setup.exe', deb: 'YTS.Player_1.1.0_amd64.deb', rpm: 'YTS.Player-1.1.0-1.x86_64.rpm', appimage: 'YTS.Player_1.1.0_amd64.AppImage' };
+  const ua = navigator.userAgent, plat = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
+  let os = 'other';
+  if (/win/i.test(plat) || /Windows/i.test(ua)) os = 'win';
+  else if (/Android|iPhone|iPad/i.test(ua)) os = 'other';
+  else if (/mac/i.test(plat) || /Mac OS X/i.test(ua)) os = 'mac';
+  else if (/linux|x11|cros/i.test(plat + ua)) os = 'linux';
+  if (/[?&]os=(win|linux|mac|other)/.test(location.search)) os = RegExp.$1; // prototype override
+
+  const note = d.getElementById('os-note'), main = d.getElementById('dl-main'), label = d.getElementById('dl-main-label'), pkg = d.getElementById('pkg');
+  const rows = [...d.querySelectorAll('.dlt-row')];
+  const mark = key => rows.forEach(r => r.classList.toggle('mine', r.dataset.os === key));
+  if (os === 'win') { label.textContent = 'Descargar para Windows'; main.href = REL + FILES.win; mark('win'); }
+  else if (os === 'linux') {
+    label.textContent = 'Descargar para Linux'; pkg.classList.add('on');
+    note.textContent = '.deb para Ubuntu, Debian, Mint y Pop!_OS · .rpm para Fedora y openSUSE · AppImage para cualquier otra.'; note.hidden = false;
+    const set = () => { main.href = REL + FILES[pkg.value]; mark(pkg.value); };
+    pkg.addEventListener('change', set); set();
+  } else if (os === 'mac') { label.textContent = 'Ver descargas'; note.textContent = 'Todavía no hay versión para macOS. Disponible para Windows 10/11 y Linux.'; note.hidden = false; }
+  else { label.textContent = 'Ver descargas'; }
+
+  /* ---------- top bar ---------- */
+  const top = d.getElementById('top');
+  const onTop = () => top.classList.toggle('solid', scrollY > 40);
+
+  /* ---------- reveals ---------- */
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -10% 0px' });
+  d.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+  /* ---------- clock ---------- */
+  const ticks = d.getElementById('ticks');
+  for (let i = 0; i < 30; i++) ticks.appendChild(d.createElement('i'));
+  const tickEls = [...ticks.children];
+  const tcM = d.getElementById('tc-m'), tcS = d.getElementById('tc-s'), now = d.getElementById('now');
+  const scenes = [...d.querySelectorAll('[data-t]')];
+  const clockSec = d.getElementById('reloj');
+  let anchors = [];
+  const measure = () => {
+    const y0 = clockSec.getBoundingClientRect().top + scrollY;
+    anchors = [[y0 - innerHeight * .25, 0], ...scenes.map(s => [s.getBoundingClientRect().top + scrollY + s.offsetHeight * .45 - innerHeight * .5, +s.dataset.t])];
+  };
+  const timeAt = y => {
+    if (y <= anchors[0][0]) return 0;
+    for (let i = 1; i < anchors.length; i++) {
+      const [ya, ta] = anchors[i - 1], [yb, tb] = anchors[i];
+      if (y < yb) return ta + (tb - ta) * (y - ya) / (yb - ya);
+    }
+    return 30;
+  };
+  let lastSec = -1;
+  const fired = new Set();
+  const runClock = () => {
+    const t = Math.max(0, Math.min(30, timeAt(scrollY)));
+    const s = Math.floor(t);
+    if (s !== lastSec) {
+      lastSec = s;
+      tcS.textContent = String(s).padStart(2, '0');
+      d.getElementById('tc').classList.toggle('run', s > 0);
+      tcM.classList.toggle('on', s > 0); tcS.classList.toggle('on', s > 0);
+      tickEls.forEach((el, i) => el.classList.toggle('held', i < s));
+      let cur = 'Abres la app';
+      scenes.forEach(sc => { if (t >= +sc.dataset.t - .5) cur = sc.dataset.now; });
+      now.textContent = cur;
+    }
+    scenes.forEach(sc => { if (t >= +sc.dataset.t - 1 && !fired.has(sc)) { fired.add(sc); live(sc); } });
+  };
+
+  /* ---------- parallax ---------- */
+  const pars = reduce ? [] : [...d.querySelectorAll('.par')];
+  const heroWin = d.getElementById('hero-win');
+  const runPar = () => {
+    const vh = innerHeight;
+    pars.forEach(el => {
+      const r = el.parentElement.getBoundingClientRect();
+      const k = +el.dataset.par, c = (r.top + r.height / 2 - vh / 2);
+      if (r.bottom < -100 || r.top > vh + 100) return;
+      el.style.transform = `translate3d(0, ${Math.max(-24, Math.min(24, c * k)).toFixed(1)}px, 0)`;
+    });
+    if (!reduce && innerWidth > 900) {
+      const p = Math.min(1, scrollY / (vh * .8));
+      heroWin.style.transform = `rotateY(${(-9 + 9 * p).toFixed(2)}deg) rotateX(${(3 - 3 * p).toFixed(2)}deg) translate3d(0, ${(p * -30).toFixed(1)}px, 0) scale(${(1 - p * .04).toFixed(3)})`;
+    }
+  };
+  heroWin.addEventListener('animationend', () => { heroWin.style.animation = 'none'; runPar(); }, { once: true });
+
+  let ticking = false;
+  const frame = () => { ticking = false; onTop(); runClock(); runPar(); };
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }, { passive: true });
+  addEventListener('resize', () => { measure(); frame(); });
+  addEventListener('load', () => { measure(); frame(); });
+  measure(); frame();
+
+  /* ---------- scene demos ---------- */
+  const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
+
+
+  // 00:09 timetable (interactive)
+  const tt = d.getElementById('tt'), ttRows = [...tt.querySelectorAll('.tt-row')];
+  const pick = row => ttRows.forEach(r => { r.setAttribute('aria-checked', r === row); r.tabIndex = r === row ? 0 : -1; });
+  ttRows.forEach((r, i) => {
+    r.addEventListener('click', () => pick(r));
+    r.addEventListener('keydown', e => {
+      const k = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0;
+      if (k) { e.preventDefault(); const n = ttRows[(i + k + ttRows.length) % ttRows.length]; pick(n); n.focus(); }
+    });
+  });
+  ttRows.forEach(r => r.tabIndex = -1); ttRows[0].tabIndex = 0;
+
+  // 00:14 buffer
+  const pieces = d.getElementById('pieces');
+  for (let i = 0; i < 160; i++) pieces.appendChild(d.createElement('i'));
+  const cells = [...pieces.children];
+  const fmt = n => n.toFixed(1).replace('.', ',');
+  async function runBuffer() {
+    const buf = d.getElementById('buf'), phase = d.getElementById('phase');
+    const peers = d.getElementById('st-peers'), speed = d.getElementById('st-speed'), mb = d.getElementById('st-mb');
+    if (reduce) {
+      cells.slice(0, 64).forEach(c => c.classList.add('held'));
+      peers.textContent = '38'; speed.textContent = '6,4'; mb.textContent = '8,0'; phase.textContent = 'Listo: empieza la película';
+      return;
+    }
+    phase.textContent = 'Conectando…';
+    await wait(700);
+    phase.textContent = 'Llenando el búfer…';
+    const order = [];
+    for (let i = 0; i < 64; i++) order.push(i);
+    for (let i = 0; i < 18; i++) order.push(64 + Math.floor(Math.random() * 96));
+    const steps = order.length;
+    for (let k = 0; k < steps; k++) {
+      const c = cells[order[k]];
+      c.classList.add('want');
+      setTimeout(() => { c.classList.remove('want'); c.classList.add('held'); }, 160);
+      const p = (k + 1) / steps;
+      peers.textContent = Math.round(4 + 34 * Math.min(1, p * 1.4));
+      speed.textContent = fmt(0.8 + 5.6 * Math.min(1, p * 1.2));
+      mb.textContent = fmt(8 * p);
+      await wait(28);
+    }
+    phase.textContent = 'Listo: empieza la película';
+  }
+
+  // 00:22 subtitles
+  function runSubs() {
+    const ps = [...d.querySelectorAll('.subs p')], played = d.getElementById('played'), time = d.getElementById('ptime');
+    let i = 0, sec = 72 * 60 + 41;
+    const tickTime = () => { const h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60, s = sec % 60; time.textContent = `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} / 2:29:00`; played.style.transform = `scaleX(${(sec / 8940).toFixed(4)})`; };
+    tickTime();
+    if (reduce) return;
+    setInterval(() => { sec++; tickTime(); }, 1000);
+    setInterval(() => { ps[i].classList.remove('cur'); i = (i + 1) % ps.length; ps[i].classList.add("cur"); }, 3400);
+  }
+
+  // buffer replays each time it comes into view
+  let bufRunning = false;
+  const bufEl = d.getElementById('buf');
+  new IntersectionObserver(es => es.forEach(async e => {
+    if (!e.isIntersecting || bufRunning) return;
+    bufRunning = true;
+    cells.forEach(c => c.className = '');
+    await wait(reduce ? 0 : 400); await runBuffer(); bufRunning = false;
+  }), { threshold: .6 }).observe(bufEl);
+
+  function live(sc) {
+    sc.classList.add('live');
+    const t = +sc.dataset.t;
+    if (t === 9) setTimeout(() => pick(tt.querySelector('[data-pick]')), reduce ? 0 : 700);
+    if (t === 22) runSubs();
+  }
+})();
+</script>
+</body>
+</html>

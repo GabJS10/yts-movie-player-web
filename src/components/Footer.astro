@@ -1,0 +1,17 @@
+---
+import { REPO_URL } from '../lib/release';
+---
+<footer class="wrap">
+  <div class="foot">
+    <a class="brand" href="/" aria-label="YTS Player, inicio">
+      <img src="/app-icon.svg" alt="" width="24" height="24" /><b style="font-size:18px">YTS</b><span>Player</span>
+    </a>
+    <nav aria-label="Pie">
+      <a href={REPO_URL}>GitHub</a>
+      <a href="/novedades">Novedades</a>
+      <a href="/docs/subtitulos">Documentación</a>
+      <a href="/legal">Legal</a>
+    </nav>
+    <small>Código bajo <a href={`${REPO_URL}/blob/main/LICENSE`}>licencia MIT</a>. La licencia cubre la app, no el contenido al que se accede con ella.</small>
+  </div>
+</footer>

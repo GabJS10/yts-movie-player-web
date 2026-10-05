@@ -1,0 +1,254 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Win from '../components/Win.astro';
+import Icon from '../components/Icon.astro';
+import { getRelease, formatDate, type PlatformKey } from '../lib/release';
+import '../styles/landing.css';
+
+import inicio from '../assets/screenshots/inicio.png';
+import lista from '../assets/screenshots/lista.png';
+import buscar from '../assets/screenshots/buscar.png';
+import ficha from '../assets/screenshots/ficha.png';
+import subs from '../assets/screenshots/subs.png';
+
+const release = await getRelease();
+const date = release.publishedAt ? formatDate(release.publishedAt) : null;
+const urls = Object.fromEntries(Object.entries(release.assets).map(([k, a]) => [k, a.url])) as Record<PlatformKey, string>;
+
+const platforms: { key: PlatformKey; title: string; note: string; button: string }[] = [
+  { key: 'win', title: 'Windows 10 / 11', note: 'Instalador por usuario, sin permisos de administrador', button: '.exe' },
+  { key: 'deb', title: 'Ubuntu · Debian · Mint · Pop!_OS', note: 'Instala solo lo necesario para reproducir', button: '.deb' },
+  { key: 'rpm', title: 'Fedora · openSUSE', note: 'Instala solo lo necesario para reproducir', button: '.rpm' },
+  { key: 'appimage', title: 'Cualquier Linux', note: 'Un solo archivo, sin instalar; trae todo incluido', button: 'AppImage' },
+];
+
+// Window frames sit in the 7/12 column on desktop and full width on phones.
+const sceneSizes = '(max-width: 900px) calc(100vw - 32px), min(56vw, 760px)';
+---
+<Base
+  title="YTS Player · Dale a play y en segundos ya la estás viendo"
+  description="App de escritorio para Windows y Linux: explora el catálogo de YTS como en Netflix y mira la película mientras se descarga, con subtítulos en español automáticos."
+>
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="h1">
+    <div class="hero-copy">
+      <h1 class="display" id="h1">
+        <span class="ln"><span>Dale a play</span></span>
+        <span class="ln"><span>y en segundos</span></span>
+        <span class="ln"><span>ya la estás</span></span>
+        <span class="ln"><span>viendo</span></span>
+      </h1>
+      <p class="lead">Una app de escritorio para Windows y Linux: el catálogo de YTS como en Netflix, la película empieza mientras se descarga y los subtítulos en español se ponen solos.</p>
+      <div class="cta">
+        <a class="btn btn-play" id="dl-main" href="#descargas" data-urls={JSON.stringify(urls)}><Icon name="dl" /><span id="dl-main-label">Descargar</span></a>
+        <label class="sr" for="pkg">Paquete de Linux</label>
+        <select class="select pkg" id="pkg">
+          <option value="deb">.deb</option>
+          <option value="rpm">.rpm</option>
+          <option value="appimage">AppImage</option>
+        </select>
+        <a class="alt" href="#descargas">Otras plataformas<Icon name="arrow" /></a>
+      </div>
+      <p class="os-note" id="os-note" hidden></p>
+      <div class="meta label">
+        <span class="tnum">{release.version ? `v${release.version}${date ? ` · ${date}` : ''}` : 'Última versión'}</span><i class="dot"></i><span>Windows 10/11</span><i class="dot"></i><span>Linux</span><i class="dot"></i><span>Código abierto · MIT</span>
+      </div>
+    </div>
+    <div class="hero-stage">
+      <Win
+        id="hero-win"
+        src={inicio}
+        eager
+        sizes="(max-width: 900px) calc(100vw - 32px), 66vw"
+        alt="Inicio de YTS Player: banner con una película recomendada, sus datos de versión y los botones Reproducir y Más info; debajo, la fila Tendencias en YTS."
+      />
+    </div>
+  </section>
+
+  <!-- THE CLOCK -->
+  <section class="clock" id="reloj" aria-label="De abrir la app a ver la película">
+    <div class="wrap clock-grid">
+      <div class="dial" aria-hidden="true">
+        <p class="tc" id="tc"><span id="tc-m">00</span><span class="colon">:</span><span id="tc-s">00</span></p>
+        <div class="ticks" id="ticks"></div>
+        <div class="dial-now"><span class="label">Ahora</span><strong id="now">Abres la app</strong></div>
+        <p class="dial-fine">Tiempos de ejemplo: dependen de tu conexión y de cuánta gente comparte la película.</p>
+      </div>
+
+      <div class="scenes">
+        <article class="scene" data-t="2" data-now="Te recibe">
+          <h2 class="headline rv">Abres la app y ya sabe qué te gusta</h2>
+          <p class="body rv d1">El inicio cambia contigo: recomendaciones según lo que viste, lo que guardaste en tu lista y tus géneros, más filas de tendencias, recientes y mejor valoradas.</p>
+          <div class="demo demo-win rv d2">
+            <Win
+              src={lista}
+              par={0.04}
+              sizes={sceneSizes}
+              alt="Inicio de YTS Player con la fila Porque viste The Godfather y la fila Mi lista; una tarjeta ampliada muestra valoración, calidades disponibles y 100+ seeds."
+            />
+          </div>
+        </article>
+
+        <article class="scene" data-t="5" data-now="Buscas">
+          <h2 class="headline rv">Encuentra cualquier cosa al escribir</h2>
+          <p class="body rv d1">Busca por título y filtra por género, calidad o valoración. Los filtros siguen ahí cuando vuelves.</p>
+          <div class="demo demo-win rv d2">
+            <Win
+              src={buscar}
+              par={0.06}
+              sizes={sceneSizes}
+              alt="Búsqueda de YTS Player: el término matrix con filtros de género, calidad, valoración y orden, y ocho resultados."
+            />
+          </div>
+        </article>
+
+        <article class="scene" data-t="9" data-now="Eliges versión">
+          <h2 class="headline rv">Eliges versión sabiendo cómo va a ir</h2>
+          <p class="body rv d1">Calidad, tamaño y cuánta gente la comparte, a la vista antes de darle a play. Las barras verdes te dicen si arrancará rápido.</p>
+          <div class="demo version rv d2">
+            <Win
+              src={ficha}
+              par={-0.04}
+              sizes="(max-width: 900px) calc(100vw - 32px), 44vw"
+              alt="Ficha de una película en YTS Player con sinopsis, reparto y la tabla Elige versión."
+            />
+            <div class="tt" role="radiogroup" aria-label="Ejemplo: elige versión" id="tt">
+              <div class="tt-head" aria-hidden="true"><span></span><span>Calidad</span><span>Fuente</span><span class="r">Tamaño</span><span class="r">Enjambre</span></div>
+              <button class="tt-row" role="radio" aria-checked="false"><span class="radio"></span><span class="q">720p</span><span class="src">BluRay · x264</span><span class="r sz">1,3 GB</span><span class="r sig-cell"><span class="sig"><i></i><i></i><i></i><i></i><i></i></span></span></button>
+              <button class="tt-row" role="radio" aria-checked="false" data-pick><span class="radio"></span><span class="q">1080p</span><span class="src">BluRay · x264</span><span class="r sz">2,4 GB</span><span class="r sig-cell"><span class="sig"><i></i><i></i><i></i><i></i><i></i></span></span></button>
+              <button class="tt-row" role="radio" aria-checked="false"><span class="radio"></span><span class="q">1080p</span><span class="src">WEB · x264</span><span class="r sz">2,4 GB</span><span class="r sig-cell"><span class="sig"><i></i><i></i><i></i><i></i><i class="off"></i></span></span></button>
+              <button class="tt-row" role="radio" aria-checked="false"><span class="radio"></span><span class="q">2160p</span><span class="src">BluRay · x265<small><Icon name="warn" />Se abre en VLC</small></span><span class="r sz">5,8 GB</span><span class="r sig-cell"><span class="sig"><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i></span></span></button>
+            </div>
+          </div>
+        </article>
+
+        <article class="scene" data-t="14" data-now="Le das a play">
+          <h2 class="headline rv">Empieza mientras se descarga</h2>
+          <p class="body rv d1">No esperas a que baje entera: con unos pocos megas listos, arranca. Y puedes adelantar a cualquier punto de la película.</p>
+          <div class="demo rv d2">
+            <div class="buf" id="buf" role="img" aria-label="Ejemplo de la pantalla de carga: el búfer se llena mientras llegan peers, velocidad y megas listos.">
+              <div class="buf-panel" aria-hidden="true">
+                <p class="buf-title">Avengers: Infinity War</p>
+                <div class="buf-row"><span class="plate go"><span>1080p</span><span>BluRay</span><span>x264</span><span>2,4 GB</span></span><span class="sig"><i></i><i></i><i></i><i></i><i></i></span></div>
+                <div class="phase"><i></i><span id="phase">Conectando…</span></div>
+                <div class="pieces" id="pieces"></div>
+                <div class="legend"><span><i class="lg-held"></i>Descargado</span><span><i class="lg-want"></i>Lo siguiente</span><span><i class="lg-wait"></i>Pendiente</span></div>
+                <div class="stats">
+                  <div><span class="label">Peers</span><b id="st-peers">0</b></div>
+                  <div><span class="label">Velocidad</span><b><span id="st-speed">0,0</span><small>MB/s</small></b></div>
+                  <div><span class="label">Listo</span><b><span id="st-mb">0,0</span><small>MB</small></b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="scene" data-t="22" data-now="Lees en español">
+          <h2 class="headline rv">Subtítulos en español, sin buscar nada</h2>
+          <p class="body rv d1">La app los encuentra y elige los que mejor encajan con tu versión. ¿Van adelantados? Ajusta el retraso al vuelo, o carga tu propio <span class="tnum">.srt</span>.</p>
+          <div class="demo demo-win rv d2">
+            <Win
+              src={subs}
+              par={0.05}
+              sizes={sceneSizes}
+              alt="Reproductor de YTS Player con un subtítulo en español en pantalla y el menú de subtítulos abierto, que marca las versiones que coinciden con la tuya."
+            />
+          </div>
+        </article>
+
+        <article class="scene" data-t="28" data-now="Y mañana sigues">
+          <h2 class="headline rv">Lo dejas, y retoma en el segundo exacto</h2>
+          <p class="body rv d1">Continuar viendo te devuelve a donde ibas. Y si prefieres tenerla sin conexión, descárgala: pausa, reanuda y elige la carpeta.</p>
+          <div class="demo after rv d2" id="after">
+            <div class="cont" tabindex="0" role="img" aria-label="Ejemplo de Continuar viendo: Avengers: Infinity War, quedan 1 h 7 min.">
+              <Image src={ficha} alt="" widths={[480, 720]} sizes="(max-width: 900px) calc(100vw - 32px), 420px" format="webp" loading="lazy" />
+              <span class="cont-play" aria-hidden="true"><Icon name="play" /></span>
+              <div class="cont-txt" aria-hidden="true"><b>Avengers: Infinity War</b><span>Quedan 1 h 7 min · 1:22:10 de 2:29:00</span></div>
+              <div class="cont-bar"><i></i></div>
+            </div>
+            <div class="dl" role="img" aria-label="Ejemplo de descargas: una película ya en la biblioteca y otra al 64 %.">
+              <div class="dl-row" aria-hidden="true"><div class="dl-top"><b>Interstellar</b><span>1080p · 2,1 GB</span></div><div class="dl-bar"><i style="--to:1"></i></div><div class="dl-state"><Icon name="check" />En la biblioteca</div></div>
+              <div class="dl-row" aria-hidden="true"><div class="dl-top"><b>Coco</b><span>1080p · 1,8 GB</span></div><div class="dl-bar"><i style="--to:.64"></i></div><div class="dl-state tnum">64 % · 3,2 MB/s</div></div>
+            </div>
+          </div>
+        </article>
+
+        <div class="finale" data-t="30" data-now="Viendo la película">
+          <p class="display rv">Ya la estás viendo.</p>
+          <div class="cta rv d1">
+            <a class="btn btn-play" href="#descargas"><Icon name="dl" />Descargar YTS Player</a>
+          </div>
+          <p class="finale-fine rv d2">Los tiempos del reloj son de ejemplo: dependen de tu conexión y de cuánta gente comparte la película.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXTRAS -->
+  <section class="band wrap" aria-labelledby="extras-h">
+    <div class="band-head">
+      <h2 class="headline rv" id="extras-h">Y lo que no se ve en 30 segundos</h2>
+    </div>
+    <ul class="extras">
+      <li class="ex rv"><span class="ex-word">Tráilers</span><div class="ex-side"><p>Ve el tráiler sin salir de la app antes de decidirte.</p></div></li>
+      <li class="ex rv"><span class="ex-word">Teclado</span><div class="ex-side"><p>Todo se maneja sin ratón, y el reproductor tiene sus atajos.</p><div class="keys"><kbd>Espacio</kbd><kbd aria-label="Flecha izquierda">←</kbd><kbd aria-label="Flecha derecha">→</kbd><kbd>F</kbd><kbd>M</kbd></div></div></li>
+      <li class="ex rv"><span class="ex-word">Sin conexión</span><div class="ex-side"><p>Sin internet, tu biblioteca descargada sigue a mano.</p></div></li>
+      <li class="ex rv"><span class="ex-word">VLC</span><div class="ex-side"><p>Las versiones que la app no puede reproducir se abren en VLC, con sus subtítulos.</p></div></li>
+      <li class="ex rv"><span class="ex-word">Al día</span><div class="ex-side"><p>La app te avisa cuando sale una versión nueva.</p></div></li>
+    </ul>
+  </section>
+
+  <!-- DOWNLOADS -->
+  <section class="band wrap" id="descargas" aria-labelledby="dl-h">
+    <div class="band-head">
+      <h2 class="headline rv" id="dl-h">Descarga la tuya</h2>
+      <span class="plate rv">
+        {release.version ? <span>v{release.version}</span> : <span>Última versión</span>}
+        {date && <span>{date}</span>}
+        <span>Windows · Linux</span>
+      </span>
+    </div>
+    <div class="dlt" id="dlt">
+      {platforms.map((p) => (
+        <div class="dlt-row" data-os={p.key}>
+          <span class="radio" aria-hidden="true"></span>
+          <div class="dlt-os"><b>{p.title}</b><span>{p.note}</span><span class="here">Tu sistema</span></div>
+          <div class="dlt-file">{release.assets[p.key].name ? <code>{release.assets[p.key].name}</code> : <span class="dlt-gh">Disponible en GitHub</span>}</div>
+          <a class="btn btn-line btn-sm" href={release.assets[p.key].url}><Icon name="dl" />{p.button}</a>
+        </div>
+      ))}
+    </div>
+    <div class="dl-foot">
+      <a href="/descargar">Cómo instalar en cada sistema</a>
+      <a href="/novedades">{release.version ? `Qué hay de nuevo en la v${release.version}` : 'Qué hay de nuevo'}</a>
+      <a href={release.url}>Todas las versiones en GitHub</a>
+      <span>macOS: todavía no.</span>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="band wrap" aria-labelledby="faq-h">
+    <div class="band-head"><h2 class="headline rv" id="faq-h">Preguntas rápidas</h2></div>
+    <div class="faq">
+      <details><summary>¿Necesito una cuenta?<Icon name="plus" /></summary><p>Para explorar y ver, no. Para los subtítulos automáticos necesitas una API key gratuita de OpenSubtitles; se pega una vez en Ajustes. <a href="/docs/subtitulos">Cómo conseguirla</a>.</p></details>
+      <details><summary>Windows dice que “protegió tu PC”. ¿Es normal?<Icon name="plus" /></summary><p>Sí: el instalador no está firmado, porque un certificado de firma cuesta dinero. Pulsa <strong>Más información → Ejecutar de todas formas</strong>. El código está abierto en GitHub.</p></details>
+      <details><summary>¿Por qué algunas versiones se abren en VLC?<Icon name="plus" /></summary><p>Algunas versiones 4K usan un formato (x265/HEVC) que la app no siempre puede reproducir. Cuando pasa, te ofrece abrirla en VLC con sus subtítulos, o elegir otra versión.</p></details>
+      <details><summary>¿Hay versión para Mac?<Icon name="plus" /></summary><p>Todavía no. Por ahora, Windows 10/11 y Linux (.deb, .rpm y AppImage).</p></details>
+      <details><summary>¿Dónde guarda las películas y los ajustes?<Icon name="plus" /></summary><p>En tu carpeta de usuario, y puedes mover la caché y las descargas al disco que quieras desde Ajustes. <a href="/docs/datos">Todas las rutas</a>.</p></details>
+    </div>
+  </section>
+
+  <!-- LEGAL -->
+  <section class="wrap" aria-labelledby="legal-h">
+    <div class="legal">
+      <h2 id="legal-h">Aviso legal</h2>
+      <div>
+        <p>YTS Player es solo un cliente: no aloja, sube ni distribuye contenido. Muestra el catálogo público de la API de YTS y usa BitTorrent para descargar lo que tú eliges; mientras descargas, también compartes partes del archivo con otras personas.</p>
+        <p>Gran parte de ese catálogo tiene derechos de autor, y descargarlo o compartirlo puede ser ilegal en tu país. El uso de la app es responsabilidad de quien la usa. Este proyecto no tiene relación con YTS ni con OpenSubtitles. <a href="/legal">Aviso legal completo</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <script>import '../scripts/landing';</script>
+</Base>

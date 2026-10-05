@@ -1,0 +1,105 @@
+/* Reading pages: section nav + one readable column. Quiet; the content leads. */
+.doc {
+  display: grid; grid-template-columns: 220px minmax(0, 760px); gap: clamp(32px, 5vw, 80px);
+  padding-top: 128px; padding-bottom: clamp(80px, 10vw, 128px);
+}
+
+/* section nav */
+.doc-nav { position: sticky; top: 96px; align-self: start; }
+.doc-nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.doc-nav a {
+  display: inline-block; padding: 7px 0; font-size: 14px; color: var(--text-2); text-decoration: none;
+  text-decoration-thickness: 2px; text-underline-offset: 7px; transition: color .15s;
+}
+.doc-nav a:hover { color: var(--text); }
+.doc-nav a[aria-current="page"] { color: var(--text); font-weight: 700; text-decoration-line: underline; text-decoration-color: var(--green); }
+
+/* page head */
+.doc-head { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
+.doc-head .lead { margin-top: 18px; max-width: 62ch; }
+.doc-head .plate { margin-top: 20px; }
+
+/* prose */
+.prose { font-size: 16px; line-height: 1.65; color: var(--text-2); }
+.prose > :first-child { margin-top: 0; }
+.prose h2 { margin: 56px 0 14px; font-size: 22px; line-height: 1.25; font-weight: 800; color: var(--text); scroll-margin-top: 96px; }
+.prose h3 { margin: 32px 0 8px; font-size: 17px; line-height: 1.3; font-weight: 750; color: var(--text); }
+.prose p { margin: 0 0 14px; max-width: 68ch; }
+.prose strong { color: var(--text); font-weight: 700; }
+.prose a { color: var(--text); text-decoration-color: var(--green); text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+.prose a:hover { color: var(--green-hi); }
+.prose ul, .prose ol { margin: 0 0 16px; padding-left: 22px; max-width: 68ch; }
+.prose li { margin: 6px 0; padding-left: 4px; }
+.prose li::marker { color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; }
+.prose code { font: 500 .86em ui-monospace, "JetBrains Mono", monospace; color: var(--text); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); border-radius: 3px; padding: 1px 5px; overflow-wrap: anywhere; }
+.prose kbd { min-width: 26px; height: 24px; font-size: 12px; }
+.prose hr { border: 0; border-top: 1px solid var(--line); margin: 48px 0; }
+
+/* tables: ruled, never boxed */
+.table { overflow-x: auto; margin: 8px 0 24px; }
+.prose table { width: 100%; border-collapse: collapse; font-size: 14.5px; line-height: 1.5; }
+.prose th { text-align: left; padding: 10px 14px 10px 0; font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); white-space: nowrap; }
+.prose td { padding: 12px 14px 12px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.prose td:first-child { color: var(--text); font-weight: 600; }
+.prose td code { white-space: nowrap; overflow-wrap: normal; }
+
+/* command blocks */
+.cmd { margin: 10px 0 22px; }
+.cmd-box { position: relative; }
+.cmd-label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--muted); }
+.cmd pre { margin: 0; padding: 14px 96px 14px 16px; overflow-x: auto; background: #111; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--line); }
+.cmd code { font: 500 13.5px/1.6 ui-monospace, "JetBrains Mono", monospace; color: var(--text); background: none; box-shadow: none; padding: 0; white-space: pre; overflow-wrap: normal; }
+.cmd-copy {
+  position: absolute; right: 9px; top: 9px; height: 30px; padding: 0 11px; border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--line-hi); background: var(--surface); color: var(--text-2); font: 600 12.5px var(--font);
+  transition: color .15s, border-color .15s;
+}
+.cmd-copy:hover { color: var(--text); border-color: var(--muted); }
+
+/* aside notes: a hairline panel, no coloured edge */
+.note { margin: 18px 0 24px; padding: 16px 18px; border-radius: 4px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+.note > :last-child { margin-bottom: 0; }
+.note .label { display: block; margin-bottom: 6px; }
+
+/* download table inside a doc: the file name takes its own line in this narrower column */
+.prose .dlt { margin: 8px 0 12px; }
+.prose .dlt-row { grid-template-columns: 32px minmax(0, 1fr) auto; row-gap: 6px; }
+.prose .dlt-file { grid-column: 2 / 3; grid-row: 2; }
+.prose .dlt-file code { overflow-wrap: anywhere; }
+
+/* changelog */
+.rel { padding: 40px 0; border-top: 1px solid var(--line); }
+.rel:first-of-type { border-top: 0; padding-top: 0; }
+.rel-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; margin-bottom: 14px; }
+.rel-head h2 { margin: 0; font-size: clamp(28px, 3vw, 36px); font-weight: 850; font-stretch: 75%; line-height: 1; letter-spacing: .005em; }
+.rel-head time { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rel-head a { margin-left: auto; font-size: 14px; }
+.rel-latest { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 3px; background: var(--green-wash); color: var(--green); font-size: 12px; font-weight: 700; }
+.rel h3 { margin-top: 24px; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.rel-body > p:first-child { font-size: 17px; color: var(--text); }
+.rel-intro p { font-size: 14px; color: var(--muted); }
+
+/* licence text */
+.license p { margin: 0 0 12px; max-width: none; }
+.license p:last-child { margin: 0; }
+.license { margin: 8px 0 24px; padding: 18px 20px; background: #111; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--line); font: 400 13px/1.6 ui-monospace, "JetBrains Mono", monospace; color: var(--text-2); overflow-wrap: anywhere; max-width: 80ch; }
+
+@media (max-width: 560px) {
+  /* two-column tables stack: label line, then the value */
+  .prose thead { display: none; }
+  .prose table, .prose tbody, .prose tr, .prose td { display: block; }
+  .prose tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .prose td { padding: 0; border: 0; }
+  .prose td + td { margin-top: 4px; }
+  .cmd pre { padding-right: 16px; }
+  .cmd-copy { position: static; margin-top: 8px; }
+  .prose .dlt-row { grid-template-columns: 26px minmax(0, 1fr); }
+  .prose .dlt-file { grid-column: 2; }
+}
+@media (max-width: 900px) {
+  .doc { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-top: 88px; }
+  .doc-nav { position: static; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+  .doc-nav ul { display: flex; gap: 22px; width: max-content; }
+  .doc-nav a { padding: 12px 0; white-space: nowrap; }
+  .rel-head a { margin-left: 0; }
+}

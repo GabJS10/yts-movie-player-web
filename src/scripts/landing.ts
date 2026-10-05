@@ -1,33 +1,19 @@
 // Landing only: OS-aware download button, the scroll-driven clock, parallax and the scene demos.
-type Os = 'win' | 'linux' | 'mac' | 'other';
-type Pkg = 'win' | 'deb' | 'rpm' | 'appimage';
+import { detectOs, markRows, type Pkg } from './os';
 
 const d = document;
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => d.getElementById(id) as T;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait = (ms: number) => new Promise((r) => setTimeout(r, reduce ? 0 : ms));
 
-/* ---------- OS detection ---------- */
-function detectOs(): Os {
-  const forced = new URLSearchParams(location.search).get('os');
-  if (forced === 'win' || forced === 'linux' || forced === 'mac' || forced === 'other') return forced;
-  const ua = navigator.userAgent;
-  const plat = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform || navigator.platform || '';
-  if (/win/i.test(plat) || /Windows/.test(ua)) return 'win';
-  if (/Android|iPhone|iPad/.test(ua)) return 'other';
-  if (/mac/i.test(plat) || /Mac OS X/.test(ua)) return 'mac';
-  if (/linux|x11|cros/i.test(plat + ua)) return 'linux';
-  return 'other';
-}
-
+/* ---------- download button ---------- */
 {
   const main = $<HTMLAnchorElement>('dl-main');
   const label = $('dl-main-label');
   const note = $('os-note');
   const pkg = $<HTMLSelectElement>('pkg');
   const urls = JSON.parse(main.dataset.urls || '{}') as Record<Pkg, string>;
-  const rows = [...d.querySelectorAll<HTMLElement>('.dlt-row')];
-  const mark = (key: Pkg) => rows.forEach((r) => r.classList.toggle('mine', r.dataset.os === key));
+  const mark = markRows;
   const os = detectOs();
 
   if (os === 'win') {

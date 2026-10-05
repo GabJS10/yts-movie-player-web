@@ -1,15 +1,18 @@
 ---
 import Icon from './Icon.astro';
 import { REPO_URL } from '../lib/release';
+
+const path = Astro.url.pathname.replace(/\.html$/, '');
+const current = (prefix: string) => (path === prefix || path.startsWith(`${prefix}/`) ? 'page' : undefined);
 ---
 <header class="top" id="top">
   <a class="brand" href="/" aria-label="YTS Player, inicio">
     <img src="/app-icon.svg" alt="" width="30" height="30" /><b>YTS</b><span>Player</span>
   </a>
   <nav class="nav" aria-label="Principal">
-    <a href="/descargar">Descargar</a>
-    <a href="/docs/subtitulos">Documentación</a>
-    <a href="/novedades">Novedades</a>
+    <a href="/descargar" aria-current={current('/descargar')}>Descargar</a>
+    <a href="/docs/subtitulos" aria-current={current('/docs')}>Documentación</a>
+    <a href="/novedades" aria-current={current('/novedades')}>Novedades</a>
     <a href={REPO_URL}>GitHub</a>
   </nav>
   <a class="btn btn-line btn-sm" href="/descargar"><Icon name="dl" /><span>Descargar</span></a>

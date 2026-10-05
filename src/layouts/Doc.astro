@@ -1,0 +1,46 @@
+---
+// Reading pages (install, docs, changelog, legal): a section nav beside one readable column.
+import Base from './Base.astro';
+import '../styles/doc.css';
+
+interface Props {
+  title: string;
+  /** Page heading; defaults to the title. */
+  heading?: string;
+  description: string;
+  lede?: string;
+}
+const { title, heading = title, description, lede } = Astro.props;
+const path = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+
+const nav = [
+  { href: '/descargar', label: 'Descargar e instalar' },
+  { href: '/docs/subtitulos', label: 'Subtítulos' },
+  { href: '/docs/datos', label: 'Dónde guarda las cosas' },
+  { href: '/docs/compilar', label: 'Compilar desde el código' },
+  { href: '/novedades', label: 'Novedades' },
+  { href: '/legal', label: 'Aviso legal y licencia' },
+];
+---
+<Base title={`${title} · YTS Player`} description={description}>
+  <div class="doc wrap">
+    <nav class="doc-nav" aria-label="Documentación">
+      <ul>
+        {nav.map((n) => (
+          <li><a href={n.href} aria-current={path === n.href ? 'page' : undefined}>{n.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <article class="doc-main">
+      <header class="doc-head">
+        <h1 class="headline">{heading}</h1>
+        {lede && <p class="lead">{lede}</p>}
+        <slot name="head" />
+      </header>
+      <div class="prose">
+        <slot />
+      </div>
+    </article>
+  </div>
+  <script>import '../scripts/copy';</script>
+</Base>

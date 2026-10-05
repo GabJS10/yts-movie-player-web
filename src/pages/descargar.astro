@@ -1,0 +1,76 @@
+---
+import Doc from '../layouts/Doc.astro';
+import Cmd from '../components/Cmd.astro';
+import DownloadTable from '../components/DownloadTable.astro';
+import { getRelease, formatDate } from '../lib/release';
+
+const release = await getRelease();
+const date = release.publishedAt ? formatDate(release.publishedAt) : null;
+// Real file names from the release; a shell glob when the API was unavailable at build time.
+const file = {
+  win: release.assets.win.name ?? 'YTS.Player_<versión>_x64-setup.exe',
+  deb: release.assets.deb.name ?? 'YTS.Player_*_amd64.deb',
+  rpm: release.assets.rpm.name ?? 'YTS.Player-*.x86_64.rpm',
+  appimage: release.assets.appimage.name ?? 'YTS.Player_*_amd64.AppImage',
+};
+---
+<Doc
+  title="Descargar e instalar"
+  description="Instaladores de YTS Player para Windows 10/11 y Linux (.deb, .rpm y AppImage), con los pasos de instalación de cada sistema."
+  lede="Elige tu sistema, descarga el archivo e instálalo con los pasos de abajo. Si no sabes qué paquete de Linux te corresponde, el AppImage funciona en cualquier distribución."
+>
+  <span slot="head" class="plate">
+    {release.version ? <span>v{release.version}</span> : <span>Última versión</span>}
+    {date && <span>{date}</span>}
+    <span>Windows · Linux</span>
+  </span>
+
+  <DownloadTable release={release} />
+  <p><a href={release.url}>Todas las versiones en GitHub</a> · macOS: todavía no hay versión.</p>
+
+  <h2 id="windows">Windows 10 y 11</h2>
+  <p>Descarga <code>{file.win}</code> y ábrelo. Se instala solo para tu usuario, sin permisos de administrador.</p>
+
+  <h3>“Windows protegió su PC”</h3>
+  <p>El instalador no está firmado (un certificado de firma cuesta dinero), así que SmartScreen lo frena la primera vez. Pulsa <strong>Más información</strong> y después <strong>Ejecutar de todas formas</strong>.</p>
+
+  <h3>Firewall</h3>
+  <p>Al primer arranque, Windows pregunta si <code>yts-player.exe</code> puede usar la red. Permítelo en redes privadas para conectar con más peers. Si lo rechazas, el streaming funciona igual, pero puede ir más lento.</p>
+
+  <h3>Versiones x265/HEVC</h3>
+  <p>Se abren en <strong>VLC</strong> si está instalado. Con la extensión HEVC de Microsoft, algunas se reproducen en la propia app.</p>
+
+  <h2 id="linux">Linux</h2>
+  <p>Descarga el paquete de tu distribución y, desde la carpeta donde lo guardaste, instálalo con su comando.</p>
+
+  <h3>Ubuntu, Debian, Linux Mint, Pop!_OS</h3>
+  <Cmd cmd={`sudo apt install ./${file.deb}`} />
+
+  <h3>Fedora, openSUSE</h3>
+  <Cmd label="Fedora" cmd={`sudo dnf install ./${file.rpm}`} />
+  <Cmd label="openSUSE" cmd={`sudo zypper install ./${file.rpm}`} />
+
+  <h3>Cualquier otra distribución</h3>
+  <p>El AppImage no se instala: se le da permiso de ejecución y se abre.</p>
+  <Cmd cmd={`chmod +x ${file.appimage} && ./${file.appimage}`} />
+
+  <div class="note">
+    <span class="label">Reproducción de video</span>
+    <p>El <code>.deb</code> y el <code>.rpm</code> instalan solos lo necesario para reproducir video (GStreamer con H.264/AAC). El AppImage ya lo trae incluido. Recomendado: <strong>VLC</strong>, para las versiones 2160p x265.</p>
+  </div>
+
+  <h2 id="actualizaciones">Actualizaciones</h2>
+  <p>La app avisa cuando hay una versión nueva. Lo que cambia en cada una está en <a href="/novedades">Novedades</a>.</p>
+
+  <h2 id="siguiente">Después de instalar</h2>
+  <ul>
+    <li><a href="/docs/subtitulos">Activa los subtítulos en español</a> con tu API key gratuita de OpenSubtitles.</li>
+    <li><a href="/docs/datos">Dónde guarda la app</a> los ajustes, la caché, las descargas y los registros.</li>
+  </ul>
+
+  <script>
+    import { detectOs, markRows } from '../scripts/os';
+    const os = detectOs();
+    markRows(os === 'win' ? 'win' : os === 'linux' ? 'deb' : null);
+  </script>
+</Doc>

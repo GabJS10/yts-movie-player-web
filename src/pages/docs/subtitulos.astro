@@ -1,0 +1,42 @@
+---
+import Doc from '../../layouts/Doc.astro';
+---
+<Doc
+  title="Subtítulos en español"
+  description="Cómo conseguir la API key gratuita de OpenSubtitles, configurarla en YTS Player y ajustar los subtítulos mientras ves la película."
+  lede="La app busca los subtítulos en OpenSubtitles y pone los que mejor encajan con tu versión. Para eso necesita una API key gratuita, que se configura una sola vez."
+>
+  <h2 id="api-key">Conseguir la API key</h2>
+  <ol>
+    <li>Crea una cuenta gratuita en <a href="https://www.opensubtitles.com">opensubtitles.com</a>.</li>
+    <li>En tu perfil, entra a <strong>API consumers</strong> y crea uno. Copia la <strong>API key</strong>.</li>
+    <li>En la app, ve a <strong>Ajustes → Subtítulos</strong>, pega la key y pulsa <strong>Probar</strong>.</li>
+  </ol>
+  <p>La key y las credenciales solo se guardan en tu equipo.</p>
+
+  <h2 id="cupos">Cuántos puedes descargar</h2>
+  <p>OpenSubtitles limita las descargas diarias:</p>
+  <div class="table">
+    <table>
+      <thead><tr><th>Cuenta en la app</th><th>Descargas al día</th></tr></thead>
+      <tbody>
+        <tr><td>Solo la API key</td><td>unas 5</td></tr>
+        <tr><td>API key + usuario y contraseña</td><td>unas 20</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>El usuario y la contraseña son opcionales y van en el mismo sitio, <strong>Ajustes → Subtítulos</strong>. Un subtítulo ya descargado se guarda en disco y no vuelve a gastar cupo. Si se agota, la app te ofrece la página de OpenSubtitles para bajarlo a mano.</p>
+
+  <h2 id="mientras-ves">Mientras ves la película</h2>
+  <ul>
+    <li>El español va por defecto; el inglés también está disponible desde el menú de subtítulos del reproductor.</li>
+    <li>Los subtítulos que coinciden con tu versión aparecen marcados como <strong>Tu versión</strong>.</li>
+    <li>Si van adelantados o atrasados, ajusta el retraso en el menú o con <kbd>G</kbd> y <kbd>H</kbd> (0,1 segundos menos o más, como en VLC).</li>
+    <li>¿Tienes tu propio archivo? Cárgalo desde el menú (<code>.srt</code> o <code>.vtt</code>) o arrastra el <code>.srt</code> a la ventana.</li>
+    <li>Si una versión se abre en VLC, los subtítulos y su retraso van con ella.</li>
+  </ul>
+
+  <div class="note">
+    <p>YTS Player no tiene relación con OpenSubtitles: usa su API pública con la key de cada persona.</p>
+  </div>
+</Doc>

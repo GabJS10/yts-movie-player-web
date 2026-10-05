@@ -1,0 +1,42 @@
+---
+import Doc from '../../layouts/Doc.astro';
+
+const rows = [
+  { what: 'Ajustes, Mi lista, progreso, subtítulos', linux: '~/.local/share/yts-player/', win: '%LOCALAPPDATA%\\yts-player\\' },
+  { what: 'Caché de streaming (con límite, 10 GB por defecto)', linux: '~/.local/share/yts-player/cache/', win: '%LOCALAPPDATA%\\yts-player\\cache\\' },
+  { what: 'Descargas', linux: '~/.local/share/yts-player/library/', win: '%LOCALAPPDATA%\\yts-player\\library\\' },
+  { what: 'Registros (logs)', linux: '~/.local/state/yts-player/logs/', win: '%LOCALAPPDATA%\\yts-player\\logs\\' },
+];
+---
+<Doc
+  title="Dónde guarda las cosas"
+  description="Rutas donde YTS Player guarda ajustes, caché de streaming, descargas y registros en Linux y Windows."
+  lede="Todo queda en tu carpeta de usuario. La caché y las descargas pueden ir a la carpeta o al disco que elijas."
+>
+  <h2 id="linux">Linux</h2>
+  <div class="table">
+    <table>
+      <thead><tr><th>Qué</th><th>Dónde</th></tr></thead>
+      <tbody>{rows.map((r) => <tr><td>{r.what}</td><td><code>{r.linux}</code></td></tr>)}</tbody>
+    </table>
+  </div>
+
+  <h2 id="windows">Windows</h2>
+  <div class="table">
+    <table>
+      <thead><tr><th>Qué</th><th>Dónde</th></tr></thead>
+      <tbody>{rows.map((r) => <tr><td>{r.what}</td><td><code>{r.win}</code></td></tr>)}</tbody>
+    </table>
+  </div>
+
+  <h2 id="cambiar">Cambiar de carpeta</h2>
+  <p>En <strong>Ajustes</strong> puedes elegir otra carpeta para la caché y otra para las descargas, también en otro disco; la app mueve lo que ya había. Ahí mismo se fija el límite de la caché: cuando se llena, se borra primero lo que hace más tiempo que no ves.</p>
+
+  <h2 id="registros">Registros</h2>
+  <p>Se abren desde <strong>Ajustes → Acerca de → Abrir carpeta de registros</strong>. Si algo falla y quieres reportarlo en <a href="https://github.com/GabJS10/yts-movie-player">GitHub</a>, son lo más útil que puedes adjuntar.</p>
+
+  <div class="note">
+    <span class="label">Al desinstalar</span>
+    <p>Desinstalar la app no borra estos datos. Si quieres quitarlos, borra las carpetas de arriba a mano.</p>
+  </div>
+</Doc>

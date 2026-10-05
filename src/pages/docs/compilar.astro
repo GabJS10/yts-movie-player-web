@@ -1,0 +1,55 @@
+---
+import Doc from '../../layouts/Doc.astro';
+import Cmd from '../../components/Cmd.astro';
+import { REPO_URL } from '../../lib/release';
+---
+<Doc
+  title="Compilar desde el código"
+  description="Requisitos, comandos y tests para compilar YTS Player (Tauri 2, React y Rust) en Linux y Windows."
+  lede="YTS Player es código abierto. Así se compila, se arranca en modo desarrollo y se pasan los tests."
+>
+  <h2 id="requisitos">Requisitos</h2>
+  <ul>
+    <li>Node 24 y Rust estable.</li>
+    <li>En Windows, las Build Tools de Visual Studio (C++) con WebView2.</li>
+    <li>En Ubuntu o Mint, estas dependencias del sistema:</li>
+  </ul>
+  <Cmd cmd={`sudo apt install libwebkit2gtk-4.1-dev build-essential libssl-dev librsvg2-dev libayatana-appindicator3-dev \\
+  gstreamer1.0-libav gstreamer1.0-plugins-good gstreamer1.0-plugins-bad`} />
+
+  <h2 id="compilar">Compilar</h2>
+  <Cmd label="Clonar e instalar dependencias" cmd={`git clone ${REPO_URL}.git
+cd yts-movie-player
+npm install`} />
+  <Cmd label="Desarrollo" cmd="npm run tauri dev" />
+  <Cmd label="Paquetes de instalación" cmd="npm run tauri build" />
+  <p>Los paquetes quedan en <code>src-tauri/target/release/bundle/</code> (el <code>.exe</code> en Windows).</p>
+
+  <h2 id="tests">Tests</h2>
+  <div class="table">
+    <table>
+      <thead><tr><th>Qué</th><th>Comando</th></tr></thead>
+      <tbody>
+        <tr><td>Front (Vitest)</td><td><code>npm test</code></td></tr>
+        <tr><td>Rust</td><td><code>cd src-tauri && cargo test</code></td></tr>
+        <tr><td>Interfaz (Playwright)</td><td><code>npm run ui</code></td></tr>
+        <tr><td>App real (WebdriverIO)</td><td><code>npm run app</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Los E2E están en <a href={`${REPO_URL}/tree/main/e2e`}><code>e2e/</code></a>.</p>
+
+  <h2 id="stack">Stack</h2>
+  <div class="table">
+    <table>
+      <tbody>
+        <tr><td>Escritorio</td><td>Tauri 2</td></tr>
+        <tr><td>Interfaz</td><td>React 19 + TypeScript, TanStack Router y Query, Tailwind</td></tr>
+        <tr><td>Torrent</td><td>librqbit</td></tr>
+        <tr><td>Servidor local de streaming</td><td>axum, con soporte de <code>Range</code></td></tr>
+        <tr><td>Datos y red</td><td>rusqlite, reqwest</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>El proyecto se desarrolló por fases con varios agentes de IA coordinados; el detalle está en <a href={`${REPO_URL}/blob/main/AGENTS.md`}><code>AGENTS.md</code></a> y <a href={`${REPO_URL}/blob/main/docs/ROADMAP.md`}><code>docs/ROADMAP.md</code></a>.</p>
+</Doc>

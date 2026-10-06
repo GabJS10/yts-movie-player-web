@@ -2,6 +2,7 @@
 // Reading pages (install, docs, changelog, legal): a section nav beside one readable column.
 import Base from './Base.astro';
 import '../styles/doc.css';
+import { cleanPath } from '../lib/url';
 
 interface Props {
   title: string;
@@ -11,7 +12,7 @@ interface Props {
   lede?: string;
 }
 const { title, heading = title, description, lede } = Astro.props;
-const path = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
+const path = cleanPath(Astro.url.pathname);
 
 const nav = [
   { href: '/descargar', label: 'Descargar e instalar' },

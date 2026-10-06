@@ -9,3 +9,47 @@
   for = "/_astro/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Pages are built as name.html and served at clean URLs (/descargar). Send the .html
+# variants there too, so each page has a single indexable address. Forced: the files exist.
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/descargar.html"
+  to = "/descargar"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/docs/subtitulos.html"
+  to = "/docs/subtitulos"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/docs/datos.html"
+  to = "/docs/datos"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/docs/compilar.html"
+  to = "/docs/compilar"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/novedades.html"
+  to = "/novedades"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/legal.html"
+  to = "/legal"
+  status = 301
+  force = true

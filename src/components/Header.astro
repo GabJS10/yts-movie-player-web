@@ -1,8 +1,9 @@
 ---
 import Icon from './Icon.astro';
 import { REPO_URL } from '../lib/release';
+import { cleanPath } from '../lib/url';
 
-const path = Astro.url.pathname.replace(/\.html$/, '');
+const path = cleanPath(Astro.url.pathname);
 const current = (prefix: string) => (path === prefix || path.startsWith(`${prefix}/`) ? 'page' : undefined);
 ---
 <header class="top" id="top">

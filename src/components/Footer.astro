@@ -1,17 +1,20 @@
 ---
 import { REPO_URL } from '../lib/release';
+import { pageLang, ROUTES } from '../i18n';
+
+const { lang, ui } = pageLang(Astro.url);
 ---
 <footer class="wrap">
   <div class="foot">
-    <a class="brand" href="/">
+    <a class="brand" href={ROUTES.home[lang]}>
       <img src="/app-icon.svg" alt="" width="24" height="24" /><b style="font-size:18px">YTS</b><span>Player</span>
     </a>
-    <nav aria-label="Pie">
+    <nav aria-label={ui.footLabel}>
       <a href={REPO_URL}>GitHub</a>
-      <a href="/novedades">Novedades</a>
-      <a href="/docs/subtitulos">Documentación</a>
-      <a href="/legal">Legal</a>
+      <a href={ROUTES.changelog[lang]}>{ui.changelog}</a>
+      <a href={ROUTES.subtitles[lang]}>{ui.docs}</a>
+      <a href={ROUTES.legal[lang]}>{ui.legal}</a>
     </nav>
-    <small>Código bajo <a href={`${REPO_URL}/blob/main/LICENSE`}>licencia MIT</a>. La licencia cubre la app, no el contenido al que se accede con ella.</small>
+    <small>{ui.license.pre}<a href={`${REPO_URL}/blob/main/LICENSE`}>{ui.license.link}</a>{ui.license.post}</small>
   </div>
 </footer>

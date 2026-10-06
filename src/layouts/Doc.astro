@@ -2,7 +2,7 @@
 // Reading pages (install, docs, changelog, legal): a section nav beside one readable column.
 import Base from './Base.astro';
 import '../styles/doc.css';
-import { cleanPath } from '../lib/url';
+import { pageLang, ROUTES } from '../i18n';
 
 interface Props {
   title: string;
@@ -12,20 +12,16 @@ interface Props {
   lede?: string;
 }
 const { title, heading = title, description, lede } = Astro.props;
-const path = cleanPath(Astro.url.pathname);
+const { lang, path, ui } = pageLang(Astro.url);
 
-const nav = [
-  { href: '/descargar', label: 'Descargar e instalar' },
-  { href: '/docs/subtitulos', label: 'Subtítulos' },
-  { href: '/docs/datos', label: 'Dónde guarda las cosas' },
-  { href: '/docs/compilar', label: 'Compilar desde el código' },
-  { href: '/novedades', label: 'Novedades' },
-  { href: '/legal', label: 'Aviso legal y licencia' },
-];
+const nav = (Object.keys(ui.docLinks) as (keyof typeof ui.docLinks)[]).map((key) => ({
+  href: ROUTES[key][lang],
+  label: ui.docLinks[key],
+}));
 ---
 <Base title={`${title} · YTS Player`} description={description}>
   <div class="doc wrap">
-    <nav class="doc-nav" aria-label="Documentación">
+    <nav class="doc-nav" aria-label={ui.docNav}>
       <ul>
         {nav.map((n) => (
           <li><a href={n.href} aria-current={path === n.href ? 'page' : undefined}>{n.label}</a></li>

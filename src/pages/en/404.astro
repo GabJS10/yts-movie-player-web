@@ -1,0 +1,15 @@
+---
+import Base from '../../layouts/Base.astro';
+import { ROUTES } from '../../i18n/routes';
+---
+<Base title="Page not found · YTS Player" description="This page doesn't exist." noindex>
+  <section class="wrap" style="padding-block: 160px 120px; display: grid; gap: 22px; justify-items: start;">
+    <p class="display">404</p>
+    <h1 class="headline">This page doesn't exist</h1>
+    <p class="lead">The link may be wrong, or the page may have moved.</p>
+    <div style="display:flex; flex-wrap:wrap; gap:12px;">
+      <a class="btn btn-play" href={ROUTES.home.en}>Go to the home page</a>
+      <a class="btn btn-line" href={ROUTES.download.en}>Download</a>
+    </div>
+  </section>
+</Base>

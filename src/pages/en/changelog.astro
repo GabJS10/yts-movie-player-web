@@ -1,0 +1,26 @@
+---
+import Doc from '../../layouts/Doc.astro';
+import { getChangelog } from '../../lib/changelog';
+import { formatDate } from '../../lib/release';
+
+const { introHtml, entries } = await getChangelog();
+---
+<Doc
+  title="Changelog"
+  description="What changes in each version of YTS Player: the full history of changes."
+  lede="What changes in each version, from the latest to the first."
+>
+  {entries.map((e, i) => (
+    <section class="rel" aria-labelledby={`v${e.version}`}>
+      <div class="rel-head">
+        <h2 id={`v${e.version}`}>v{e.version}</h2>
+        {e.date && <time datetime={e.date.toISOString().slice(0, 10)}>{formatDate(e.date, 'en')}</time>}
+        {i === 0 && <span class="rel-latest">Latest</span>}
+        {e.url && <a href={e.url}>View on GitHub</a>}
+      </div>
+      <div class="rel-body" set:html={e.html} />
+    </section>
+  ))}
+  <hr />
+  <div class="rel-intro" set:html={introHtml} />
+</Doc>

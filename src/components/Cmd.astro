@@ -1,12 +1,15 @@
 ---
 // A shell command the reader will paste: monospace, with a copy button (scripts/copy.ts).
 interface Props { cmd: string; label?: string }
+import { pageLang } from '../i18n';
+
 const { cmd, label } = Astro.props;
+const { ui } = pageLang(Astro.url);
 ---
 <div class="cmd">
   {label && <span class="cmd-label">{label}</span>}
   <div class="cmd-box">
     <pre><code>{cmd}</code></pre>
-    <button class="cmd-copy" type="button" data-copy={cmd} aria-label={`Copiar el comando: ${cmd}`}>Copiar</button>
+    <button class="cmd-copy" type="button" data-copy={cmd} aria-label={ui.copyCmd(cmd)}>{ui.copy}</button>
   </div>
 </div>

@@ -1,0 +1,42 @@
+---
+import Doc from '../../../layouts/Doc.astro';
+
+const rows = [
+  { what: 'Settings, My list, progress, subtitles', linux: '~/.local/share/yts-player/', win: '%LOCALAPPDATA%\\yts-player\\' },
+  { what: 'Streaming cache (capped, 10 GB by default)', linux: '~/.local/share/yts-player/cache/', win: '%LOCALAPPDATA%\\yts-player\\cache\\' },
+  { what: 'Downloads', linux: '~/.local/share/yts-player/library/', win: '%LOCALAPPDATA%\\yts-player\\library\\' },
+  { what: 'Logs', linux: '~/.local/state/yts-player/logs/', win: '%LOCALAPPDATA%\\yts-player\\logs\\' },
+];
+---
+<Doc
+  title="Where it keeps things"
+  description="Where YTS Player stores settings, streaming cache, downloads and logs on Linux and Windows."
+  lede="Everything stays in your user folder. The cache and downloads can go to any folder or drive you choose."
+>
+  <h2 id="linux">Linux</h2>
+  <div class="table">
+    <table>
+      <thead><tr><th>What</th><th>Where</th></tr></thead>
+      <tbody>{rows.map((r) => <tr><td>{r.what}</td><td><code>{r.linux}</code></td></tr>)}</tbody>
+    </table>
+  </div>
+
+  <h2 id="windows">Windows</h2>
+  <div class="table">
+    <table>
+      <thead><tr><th>What</th><th>Where</th></tr></thead>
+      <tbody>{rows.map((r) => <tr><td>{r.what}</td><td><code>{r.win}</code></td></tr>)}</tbody>
+    </table>
+  </div>
+
+  <h2 id="change">Change the folder</h2>
+  <p>In <strong>Settings</strong> you can pick another folder for the cache and another for downloads, on another drive too; the app moves what was already there. That's also where you set the cache limit: when it fills up, whatever you haven't watched for the longest is deleted first.</p>
+
+  <h2 id="logs">Logs</h2>
+  <p>Open them from <strong>Settings › About › Open logs folder</strong>. If something fails and you want to report it on <a href="https://github.com/GabJS10/yts-movie-player">GitHub</a>, they're the most useful thing you can attach.</p>
+
+  <div class="note">
+    <span class="label">When uninstalling</span>
+    <p>Uninstalling the app doesn't delete this data. If you want it gone, delete the folders above by hand.</p>
+  </div>
+</Doc>

@@ -3,24 +3,31 @@ import Doc from '../layouts/Doc.astro';
 import { getChangelog } from '../lib/changelog';
 import { formatDate } from '../lib/release';
 
-const { introHtml, entries } = await getChangelog();
+const { introHtml, entries, lang } = await getChangelog();
+// The app's changelog is written in English; it is shown as is, marked with its language.
+const notesLang = lang === 'es' ? undefined : lang;
 ---
 <Doc
   title="Novedades"
   description="Qué cambia en cada versión de YTS Player: historial completo de cambios."
   lede="Qué cambia en cada versión, de la más reciente a la primera."
 >
+  {notesLang && (
+    <div class="note">
+      <p>Las notas de cada versión están escritas en inglés.</p>
+    </div>
+  )}
   {entries.map((e, i) => (
     <section class="rel" aria-labelledby={`v${e.version}`}>
       <div class="rel-head">
         <h2 id={`v${e.version}`}>v{e.version}</h2>
-        {e.date && <time datetime={e.date.toISOString().slice(0, 10)}>{formatDate(e.date)}</time>}
+        {e.date && <time datetime={e.date.toISOString().slice(0, 10)}>{formatDate(e.date, 'es')}</time>}
         {i === 0 && <span class="rel-latest">Última</span>}
         {e.url && <a href={e.url}>Ver en GitHub</a>}
       </div>
-      <div class="rel-body" set:html={e.html} />
+      <div class="rel-body" lang={notesLang} set:html={e.html} />
     </section>
   ))}
   <hr />
-  <div class="rel-intro" set:html={introHtml} />
+  <div class="rel-intro" lang={notesLang} set:html={introHtml} />
 </Doc>

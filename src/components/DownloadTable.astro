@@ -2,23 +2,21 @@
 // One row per installer; the visitor's OS row is highlighted client-side (scripts/os.ts).
 import Icon from './Icon.astro';
 import type { Release, PlatformKey } from '../lib/release';
+import { pageLang } from '../i18n';
 
 interface Props { release: Release }
 const { release } = Astro.props;
+const { ui } = pageLang(Astro.url);
 
-const PLATFORMS: { key: PlatformKey; title: string; note: string; button: string }[] = [
-  { key: 'win', title: 'Windows 10 / 11', note: 'Instalador por usuario, sin permisos de administrador', button: '.exe' },
-  { key: 'deb', title: 'Ubuntu · Debian · Mint · Pop!_OS', note: 'Instala solo lo necesario para reproducir', button: '.deb' },
-  { key: 'rpm', title: 'Fedora · openSUSE', note: 'Instala solo lo necesario para reproducir', button: '.rpm' },
-  { key: 'appimage', title: 'Cualquier Linux', note: 'Un solo archivo, sin instalar; trae todo incluido', button: 'AppImage' },
-];
+const BUTTON: Record<PlatformKey, string> = { win: '.exe', deb: '.deb', rpm: '.rpm', appimage: 'AppImage' };
+const PLATFORMS = (Object.keys(BUTTON) as PlatformKey[]).map((key) => ({ key, ...ui.platforms[key], button: BUTTON[key] }));
 ---
 <div class="dlt">
   {PLATFORMS.map((p) => (
     <div class="dlt-row" data-os={p.key}>
       <span class="radio" aria-hidden="true"></span>
-      <div class="dlt-os"><b>{p.title}</b><span>{p.note}</span><span class="here">Tu sistema</span></div>
-      <div class="dlt-file">{release.assets[p.key].name ? <code>{release.assets[p.key].name}</code> : <span class="dlt-gh">Disponible en GitHub</span>}</div>
+      <div class="dlt-os"><b>{p.title}</b><span>{p.note}</span><span class="here">{ui.yourSystem}</span></div>
+      <div class="dlt-file">{release.assets[p.key].name ? <code>{release.assets[p.key].name}</code> : <span class="dlt-gh">{ui.onGitHub}</span>}</div>
       <a class="btn btn-line btn-sm" href={release.assets[p.key].url}><Icon name="dl" />{p.button}</a>
     </div>
   ))}

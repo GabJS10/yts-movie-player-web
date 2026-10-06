@@ -1,0 +1,78 @@
+---
+import Doc from '../../layouts/Doc.astro';
+import Cmd from '../../components/Cmd.astro';
+import DownloadTable from '../../components/DownloadTable.astro';
+import { getRelease, formatDate } from '../../lib/release';
+import { ROUTES } from '../../i18n/routes';
+
+const release = await getRelease();
+const date = release.publishedAt ? formatDate(release.publishedAt, 'en') : null;
+// Real file names from the release; a shell glob when the API was unavailable at build time.
+const file = {
+  win: release.assets.win.name ?? 'YTS.Player_<version>_x64-setup.exe',
+  deb: release.assets.deb.name ?? 'YTS.Player_*_amd64.deb',
+  rpm: release.assets.rpm.name ?? 'YTS.Player-*.x86_64.rpm',
+  appimage: release.assets.appimage.name ?? 'YTS.Player_*_amd64.AppImage',
+};
+---
+<Doc
+  title="Download and install"
+  description="YTS Player installers for Windows 10/11 and Linux (.deb, .rpm and AppImage), with the install steps for each system."
+  lede="Pick your system, download the file and install it with the steps below. If you're not sure which Linux package is yours, the AppImage works on any distribution."
+>
+  <span slot="head" class="plate">
+    {release.version ? <span>v{release.version}</span> : <span>Latest version</span>}
+    {date && <span>{date}</span>}
+    <span>Windows · Linux</span>
+  </span>
+
+  <DownloadTable release={release} />
+  <p><a href={release.url}>All versions on GitHub</a> · macOS: no version yet.</p>
+
+  <h2 id="windows">Windows 10 and 11</h2>
+  <p>Download <code>{file.win}</code> and open it. It installs for your user only, no administrator rights needed.</p>
+
+  <h3>“Windows protected your PC”</h3>
+  <p>The installer isn't signed (a code-signing certificate costs money), so SmartScreen stops it the first time. Click <strong>More info</strong> and then <strong>Run anyway</strong>.</p>
+
+  <h3>Firewall</h3>
+  <p>On first launch, Windows asks whether <code>yts-player.exe</code> may use the network. Allow it on private networks to reach more peers. If you deny it, streaming still works, but it may be slower.</p>
+
+  <h3>x265/HEVC versions</h3>
+  <p>They open in <strong>VLC</strong> if it's installed. With Microsoft's HEVC extension, some play in the app itself.</p>
+
+  <h2 id="linux">Linux</h2>
+  <p>Download your distribution's package and, from the folder where you saved it, install it with its command.</p>
+
+  <h3>Ubuntu, Debian, Linux Mint, Pop!_OS</h3>
+  <Cmd cmd={`sudo apt install ./${file.deb}`} />
+
+  <h3>Fedora, openSUSE</h3>
+  <Cmd label="Fedora" cmd={`sudo dnf install ./${file.rpm}`} />
+  <Cmd label="openSUSE" cmd={`sudo zypper install --allow-unsigned-rpm ./${file.rpm}`} />
+
+  <h3>Any other distribution</h3>
+  <p>The AppImage isn't installed: you make it executable and open it.</p>
+  <Cmd cmd={`chmod +x ${file.appimage} && ./${file.appimage}`} />
+
+  <div class="note">
+    <span class="label">Video playback</span>
+    <p>The <code>.deb</code> and <code>.rpm</code> install what video playback needs on their own (GStreamer with H.264/AAC). The AppImage already bundles it. Recommended: <strong>VLC</strong>, for the 2160p x265 versions.</p>
+  </div>
+
+  <h2 id="updates">Updates</h2>
+  <p>The app tells you when there's a new version. What changes in each one is in the <a href={ROUTES.changelog.en}>Changelog</a>.</p>
+
+  <h2 id="next">After installing</h2>
+  <ul>
+    <li><a href={ROUTES.subtitles.en}>Turn on automatic subtitles</a> with your free OpenSubtitles API key.</li>
+    <li><a href={ROUTES.data.en}>Where the app keeps</a> its settings, cache, downloads and logs.</li>
+  </ul>
+  <p>The app opens in your system language, English or Spanish. You can switch it in <strong>Settings › Language</strong>.</p>
+
+  <script>
+    import { detectOs, markRows } from '../../scripts/os';
+    const os = detectOs();
+    markRows(os === 'win' ? 'win' : os === 'linux' ? 'deb' : null);
+  </script>
+</Doc>

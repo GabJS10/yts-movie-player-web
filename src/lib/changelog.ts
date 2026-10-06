@@ -1,7 +1,10 @@
 // CHANGELOG.md from the app's main branch, fetched at build time. Falls back to the copy in
 // src/content when GitHub is unreachable, so the build never breaks.
+// The changelog is written in English only: both language versions of the site show it as is,
+// and a page in another language marks it lang="en" (see `lang`).
 import { marked } from 'marked';
 import localCopy from '../content/CHANGELOG.md?raw';
+import type { Lang } from '../i18n/routes';
 
 const RAW = 'https://raw.githubusercontent.com/GabJS10/yts-movie-player/main/CHANGELOG.md';
 
@@ -17,6 +20,8 @@ export interface Changelog {
   introHtml: string;
   entries: Entry[];
   fromRemote: boolean;
+  /** Language the notes are written in. */
+  lang: Lang;
 }
 
 async function source(): Promise<{ md: string; fromRemote: boolean }> {
@@ -30,9 +35,13 @@ async function source(): Promise<{ md: string; fromRemote: boolean }> {
   }
 }
 
-export async function getChangelog(): Promise<Changelog> {
-  const { md, fromRemote } = await source();
+let cached: Promise<Changelog> | undefined;
+/** Memoised so every page in one build shares a single request. */
+export function getChangelog(): Promise<Changelog> {
+  return (cached ??= source().then(({ md, fromRemote }) => parse(md, fromRemote)));
+}
 
+function parse(md: string, fromRemote: boolean): Changelog {
   // Link reference definitions ("[1.1.0]: https://…") give each version its release URL.
   const refs = new Map<string, string>();
   const body = md.replace(/^\[([^\]]+)\]:\s*(\S+)\s*$/gm, (_, k: string, url: string) => {
@@ -59,5 +68,5 @@ export async function getChangelog(): Promise<Changelog> {
     })
     .filter((e): e is Entry => e !== null && e.version.toLowerCase() !== 'unreleased');
 
-  return { introHtml: marked.parse(intro, { async: false }), entries, fromRemote };
+  return { introHtml: marked.parse(intro, { async: false }), entries, fromRemote, lang: 'en' };
 }

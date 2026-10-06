@@ -1,0 +1,242 @@
+---
+// The landing, in either language: pages/index.astro (es) and pages/en/index.astro (en).
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Win from './Win.astro';
+import Icon from './Icon.astro';
+import DownloadTable from './DownloadTable.astro';
+import { getRelease, formatDate, type PlatformKey } from '../lib/release';
+import { LANDING } from '../i18n/landing';
+import { ROUTES, type Lang } from '../i18n/routes';
+import '../styles/landing.css';
+
+import inicio from '../assets/screenshots/inicio.png';
+import lista from '../assets/screenshots/lista.png';
+import buscar from '../assets/screenshots/buscar.png';
+import ficha from '../assets/screenshots/ficha.png';
+import subs from '../assets/screenshots/subs.png';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = LANDING[lang];
+const dlHash = `#${c.downloads.id}`;
+
+const release = await getRelease();
+const date = release.publishedAt ? formatDate(release.publishedAt, lang) : null;
+const urls = Object.fromEntries(Object.entries(release.assets).map(([k, a]) => [k, a.url])) as Record<PlatformKey, string>;
+
+
+// Window frames sit in the 7/12 column on desktop and full width on phones.
+const sceneSizes = '(max-width: 900px) calc(100vw - 32px), min(56vw, 760px)';
+---
+<Base title={c.title} description={c.description}>
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="h1">
+    <div class="hero-copy">
+      <h1 class="display" id="h1">
+        {c.hero.lines.map((l) => <span class="ln"><span>{l}</span></span>)}
+      </h1>
+      <p class="lead">{c.hero.lead}</p>
+      <div class="cta">
+        <a class="btn btn-play" id="dl-main" href={dlHash} data-urls={JSON.stringify(urls)}><Icon name="dl" /><span id="dl-main-label">{c.hero.download}</span></a>
+        <label class="sr" for="pkg">{c.hero.pkgLabel}</label>
+        <select class="select pkg" id="pkg">
+          <option value="deb">.deb</option>
+          <option value="rpm">.rpm</option>
+          <option value="appimage">AppImage</option>
+        </select>
+        <a class="alt" href={dlHash}>{c.hero.otherPlatforms}<Icon name="arrow" /></a>
+      </div>
+      <p class="os-note" id="os-note" hidden></p>
+      <div class="meta label">
+        <span class="tnum">{release.version ? `v${release.version}${date ? ` · ${date}` : ''}` : c.hero.latest}</span>
+        {c.hero.meta.map((m) => <><i class="dot"></i><span>{m}</span></>)}
+      </div>
+    </div>
+    <div class="hero-stage">
+      <Win
+        id="hero-win"
+        src={inicio}
+        eager
+        sizes="(max-width: 900px) calc(100vw - 32px), 66vw"
+        alt={c.hero.alt}
+      />
+    </div>
+  </section>
+
+  <!-- THE CLOCK -->
+  <section class="clock" id="reloj" aria-label={c.clock.label}>
+    <div class="wrap clock-grid">
+      <div class="dial" aria-hidden="true">
+        <p class="tc" id="tc"><span id="tc-m">00</span><span class="colon">:</span><span id="tc-s">00</span></p>
+        <div class="ticks" id="ticks"></div>
+        <div class="dial-now"><span class="label">{c.clock.now}</span><strong id="now">{c.clock.openApp}</strong></div>
+        <p class="dial-fine">{c.clock.fine}</p>
+      </div>
+
+      <div class="scenes">
+        <article class="scene" data-t="2" data-now={c.home.now}>
+          <h2 class="headline rv">{c.home.h}</h2>
+          <p class="body rv d1">{c.home.body}</p>
+          <div class="demo demo-win rv d2">
+            <Win
+              src={lista}
+              par={0.04}
+              sizes={sceneSizes}
+              alt={c.home.alt}
+            />
+          </div>
+        </article>
+
+        <article class="scene" data-t="5" data-now={c.search.now}>
+          <h2 class="headline rv">{c.search.h}</h2>
+          <p class="body rv d1">{c.search.body}</p>
+          <div class="demo demo-win rv d2">
+            <Win
+              src={buscar}
+              par={0.06}
+              sizes={sceneSizes}
+              alt={c.search.alt}
+            />
+          </div>
+        </article>
+
+        <article class="scene" data-t="9" data-now={c.version.now}>
+          <h2 class="headline rv">{c.version.h}</h2>
+          <p class="body rv d1">{c.version.body}</p>
+          <div class="demo version rv d2">
+            <Win
+              src={ficha}
+              par={-0.04}
+              sizes="(max-width: 900px) calc(100vw - 32px), 44vw"
+              alt={c.version.alt}
+            />
+            <div class="tt" role="radiogroup" aria-label={c.version.table} id="tt">
+              <div class="tt-head" aria-hidden="true"><span></span><span>{c.version.head[0]}</span><span>{c.version.head[1]}</span><span class="r">{c.version.head[2]}</span><span class="r">{c.version.head[3]}</span></div>
+              <button class="tt-row" role="radio" aria-checked="false"><span class="radio"></span><span class="q">720p</span><span class="src">BluRay · x264</span><span class="r sz">{c.version.sizes[0]}</span><span class="r sig-cell"><span class="sig"><i></i><i></i><i></i><i></i><i></i></span></span></button>
+              <button class="tt-row" role="radio" aria-checked="false" data-pick><span class="radio"></span><span class="q">1080p</span><span class="src">BluRay · x264</span><span class="r sz">{c.version.sizes[1]}</span><span class="r sig-cell"><span class="sig"><i></i><i></i><i></i><i></i><i></i></span></span></button>
+              <button class="tt-row" role="radio" aria-checked="false"><span class="radio"></span><span class="q">1080p</span><span class="src">WEB · x264</span><span class="r sz">{c.version.sizes[1]}</span><span class="r sig-cell"><span class="sig"><i></i><i></i><i></i><i></i><i class="off"></i></span></span></button>
+              <button class="tt-row" role="radio" aria-checked="false"><span class="radio"></span><span class="q">2160p</span><span class="src">BluRay · x265<small><Icon name="warn" />{c.version.vlc}</small></span><span class="r sz">{c.version.sizes[3]}</span><span class="r sig-cell"><span class="sig"><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i></span></span></button>
+            </div>
+          </div>
+        </article>
+
+        <article class="scene" data-t="14" data-now={c.stream.now}>
+          <h2 class="headline rv">{c.stream.h}</h2>
+          <p class="body rv d1">{c.stream.body}</p>
+          <div class="demo rv d2">
+            <div class="buf" id="buf" role="img" aria-label={c.stream.aria}>
+              <div class="buf-panel" aria-hidden="true">
+                <p class="buf-title">Avengers: Infinity War</p>
+                <div class="buf-row"><span class="plate go"><span>1080p</span><span>BluRay</span><span>x264</span><span>{c.stream.size}</span></span><span class="sig"><i></i><i></i><i></i><i></i><i></i></span></div>
+                <div class="phase"><i></i><span id="phase">{c.stream.connecting}</span></div>
+                <div class="pieces" id="pieces"></div>
+                <div class="legend"><span><i class="lg-held"></i>{c.stream.legend[0]}</span><span><i class="lg-want"></i>{c.stream.legend[1]}</span><span><i class="lg-wait"></i>{c.stream.legend[2]}</span></div>
+                <div class="stats">
+                  <div><span class="label">{c.stream.stats[0]}</span><b id="st-peers">0</b></div>
+                  <div><span class="label">{c.stream.stats[1]}</span><b><span id="st-speed">{c.stream.zero}</span><small>MB/s</small></b></div>
+                  <div><span class="label">{c.stream.stats[2]}</span><b><span id="st-mb">{c.stream.zero}</span><small>MB</small></b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="scene" data-t="22" data-now={c.subs.now}>
+          <h2 class="headline rv">{c.subs.h}</h2>
+          <p class="body rv d1" set:html={c.subs.bodyHtml} />
+          <div class="demo demo-win rv d2">
+            <Win
+              src={subs}
+              par={0.05}
+              sizes={sceneSizes}
+              alt={c.subs.alt}
+            />
+          </div>
+        </article>
+
+        <article class="scene" data-t="28" data-now={c.resume.now}>
+          <h2 class="headline rv">{c.resume.h}</h2>
+          <p class="body rv d1">{c.resume.body}</p>
+          <div class="demo after rv d2" id="after">
+            <div class="cont" tabindex="0" role="img" aria-label={c.resume.contAria}>
+              <Image src={ficha} alt="" widths={[480, 720]} sizes="(max-width: 900px) calc(100vw - 32px), 420px" format="webp" loading="lazy" />
+              <span class="cont-play" aria-hidden="true"><Icon name="play" /></span>
+              <div class="cont-txt" aria-hidden="true"><b>Avengers: Infinity War</b><span>{c.resume.contTxt}</span></div>
+              <div class="cont-bar"><i></i></div>
+            </div>
+            <div class="dl" role="img" aria-label={c.resume.dlAria}>
+              <div class="dl-row" aria-hidden="true"><div class="dl-top"><b>Interstellar</b><span>{c.resume.dl[0].size}</span></div><div class="dl-bar"><i style="--to:1"></i></div><div class="dl-state"><Icon name="check" />{c.resume.dl[0].state}</div></div>
+              <div class="dl-row" aria-hidden="true"><div class="dl-top"><b>Coco</b><span>{c.resume.dl[1].size}</span></div><div class="dl-bar"><i style="--to:.64"></i></div><div class="dl-state tnum">{c.resume.dl[1].state}</div></div>
+            </div>
+          </div>
+        </article>
+
+        <div class="finale" data-t="30" data-now={c.finale.now}>
+          <p class="display rv">{c.finale.h}</p>
+          <div class="cta rv d1">
+            <a class="btn btn-play" href={dlHash}><Icon name="dl" />{c.finale.cta}</a>
+          </div>
+          <p class="finale-fine rv d2">{c.finale.fine}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXTRAS -->
+  <section class="band wrap" aria-labelledby="extras-h">
+    <div class="band-head">
+      <h2 class="headline rv" id="extras-h">{c.extras.h}</h2>
+    </div>
+    <ul class="extras">
+      {c.extras.items.map((x) => (
+        <li class="ex rv">
+          <span class="ex-word">{x.word}</span>
+          <div class="ex-side">
+            <p>{x.text}</p>
+            {'keys' in x && <div class="keys"><kbd>{c.extras.space}</kbd><kbd aria-label={c.extras.left}>←</kbd><kbd aria-label={c.extras.right}>→</kbd><kbd>F</kbd><kbd>M</kbd></div>}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- DOWNLOADS -->
+  <section class="band wrap" id={c.downloads.id} aria-labelledby="dl-h">
+    <div class="band-head">
+      <h2 class="headline rv" id="dl-h">{c.downloads.h}</h2>
+      <span class="plate rv">
+        {release.version ? <span>v{release.version}</span> : <span>{c.hero.latest}</span>}
+        {date && <span>{date}</span>}
+        <span>{c.downloads.platforms}</span>
+      </span>
+    </div>
+    <DownloadTable release={release} />
+    <div class="dl-foot">
+      <a href={ROUTES.download[lang]}>{c.downloads.howTo}</a>
+      <a href={ROUTES.changelog[lang]}>{c.downloads.whatsNew(release.version)}</a>
+      <a href={release.url}>{c.downloads.all}</a>
+      <span>{c.downloads.mac}</span>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="band wrap" aria-labelledby="faq-h">
+    <div class="band-head"><h2 class="headline rv" id="faq-h">{c.faq.h}</h2></div>
+    <div class="faq">
+      {c.faq.items.map((f) => <details><summary>{f.q}<Icon name="plus" /></summary><p set:html={f.aHtml} /></details>)}
+    </div>
+  </section>
+
+  <!-- LEGAL -->
+  <section class="wrap" aria-labelledby="legal-h">
+    <div class="legal">
+      <h2 id="legal-h">{c.legal.h}</h2>
+      <div>
+        {c.legal.parasHtml.map((p) => <p set:html={p} />)}
+      </div>
+    </div>
+  </section>
+
+  <script>import '../scripts/landing';</script>
+</Base>

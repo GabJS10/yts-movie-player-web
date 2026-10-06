@@ -86,7 +86,11 @@ html { scrollbar-color: var(--line-hi) var(--ground); }
 .nav a { padding: 8px 12px; border-radius: 4px; text-decoration: none; color: var(--text-2); font-size: 14px; font-weight: 500; transition: color .15s; }
 .nav a:hover { color: var(--text); }
 .nav a[aria-current="page"] { color: var(--text); font-weight: 700; text-decoration: underline 2px var(--green); text-underline-offset: 8px; }
-.top .btn { margin-left: auto; }
+.top-end { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.lang { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 10px; border-radius: 4px; text-decoration: none; color: var(--text-2); font-size: 14px; font-weight: 500; transition: color .15s; }
+.lang:hover { color: var(--text); }
+.lang svg { width: 17px; height: 17px; }
+.lang-short { display: none; font-weight: 700; letter-spacing: .04em; }
 
 /* reveal (JS adds .js to html) */
 .js .rv { opacity: 0; transform: translateY(28px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
@@ -150,6 +154,8 @@ footer { border-top: 1px solid var(--line); padding: 28px 0 40px; }
 @media (max-width: 560px) {
   .btn { --h: 44px; }
   .top .btn span { display: none; }
+  .lang-long { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .lang-short { display: inline; }
   .top .btn { padding: 0 10px; }
 }
 

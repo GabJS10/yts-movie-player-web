@@ -5,7 +5,7 @@ import DownloadTable from '../components/DownloadTable.astro';
 import { getRelease, formatDate } from '../lib/release';
 
 const release = await getRelease();
-const date = release.publishedAt ? formatDate(release.publishedAt) : null;
+const date = release.publishedAt ? formatDate(release.publishedAt, 'es') : null;
 // Real file names from the release; a shell glob when the API was unavailable at build time.
 const file = {
   win: release.assets.win.name ?? 'YTS.Player_<versión>_x64-setup.exe',
@@ -67,6 +67,7 @@ const file = {
     <li><a href="/docs/subtitulos">Activa los subtítulos en español</a> con tu API key gratuita de OpenSubtitles.</li>
     <li><a href="/docs/datos">Dónde guarda la app</a> los ajustes, la caché, las descargas y los registros.</li>
   </ul>
+  <p>La app se abre en el idioma de tu sistema, español o inglés. Se cambia en <strong>Ajustes › Idioma</strong>.</p>
 
   <script>
     import { detectOs, markRows } from '../scripts/os';

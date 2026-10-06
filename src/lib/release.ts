@@ -1,5 +1,6 @@
 // Latest release of the app, fetched once at build time. Never fails the build:
 // on any error every download points at the releases page.
+import { LOCALE, type Lang } from '../i18n/routes';
 
 const REPO = 'GabJS10/yts-movie-player';
 export const RELEASES_LATEST = `https://github.com/${REPO}/releases/latest`;
@@ -82,7 +83,7 @@ let cached: Promise<Release> | undefined;
 /** Memoised so every page in one build shares a single request. */
 export const getRelease = () => (cached ??= load());
 
-export const formatDate = (d: Date) =>
-  new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+export const formatDate = (d: Date, lang: Lang = 'es') =>
+  new Intl.DateTimeFormat(LOCALE[lang], { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
     .format(d)
     .replace('.', '');

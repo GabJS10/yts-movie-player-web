@@ -1,5 +1,6 @@
 // Landing only: OS-aware download button, the scroll-driven clock, parallax and the scene demos.
 import { detectOs, markRows, type Pkg } from './os';
+import { text } from './strings';
 
 const d = document;
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => d.getElementById(id) as T;
@@ -17,13 +18,13 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, reduce ? 0 : ms));
   const os = detectOs();
 
   if (os === 'win') {
-    label.textContent = 'Descargar para Windows';
+    label.textContent = text.dlWin;
     main.href = urls.win;
     mark('win');
   } else if (os === 'linux') {
-    label.textContent = 'Descargar para Linux';
+    label.textContent = text.dlLinux;
     pkg.classList.add('on');
-    note.textContent = '.deb para Ubuntu, Debian, Mint y Pop!_OS · .rpm para Fedora y openSUSE · AppImage para cualquier otra.';
+    note.textContent = text.linuxNote;
     note.hidden = false;
     const set = () => {
       const key = pkg.value as Pkg;
@@ -33,10 +34,10 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, reduce ? 0 : ms));
     pkg.addEventListener('change', set);
     set();
   } else {
-    label.textContent = 'Ver descargas';
+    label.textContent = text.dlOther;
   }
   if (os === 'mac') {
-    note.textContent = 'Todavía no hay versión para macOS. Disponible para Windows 10/11 y Linux.';
+    note.textContent = text.macNote;
     note.hidden = false;
   }
 }
@@ -78,7 +79,7 @@ const runClock = () => {
     tcM.classList.toggle('on', s > 0);
     tcS.classList.toggle('on', s > 0);
     tickEls.forEach((el, i) => el.classList.toggle('held', i < s));
-    let cur = 'Abres la app';
+    let cur = text.openApp;
     scenes.forEach((sc) => { if (t >= +sc.dataset.t! - 0.5) cur = sc.dataset.now!; });
     now.textContent = cur;
   }
@@ -138,19 +139,19 @@ ttRows.forEach((r, i) => {
 const pieces = $('pieces');
 for (let i = 0; i < 160; i++) pieces.appendChild(d.createElement('i'));
 const cells = [...pieces.children];
-const fmt = (n: number) => n.toFixed(1).replace('.', ',');
+const fmt = (n: number) => n.toFixed(1).replace('.', text.decimal);
 
 async function runBuffer() {
   const phase = $('phase'), peers = $('st-peers'), speed = $('st-speed'), mb = $('st-mb');
   if (reduce) {
     cells.slice(0, 64).forEach((c) => c.classList.add('held'));
-    peers.textContent = '38'; speed.textContent = '6,4'; mb.textContent = '8,0';
-    phase.textContent = 'Listo: empieza la película';
+    peers.textContent = '38'; speed.textContent = fmt(6.4); mb.textContent = fmt(8);
+    phase.textContent = text.ready;
     return;
   }
-  phase.textContent = 'Conectando…';
+  phase.textContent = text.connecting;
   await wait(700);
-  phase.textContent = 'Llenando el búfer…';
+  phase.textContent = text.buffering;
   const order = Array.from({ length: 64 }, (_, i) => i);
   for (let i = 0; i < 18; i++) order.push(64 + Math.floor(Math.random() * 96));
   for (let k = 0; k < order.length; k++) {
@@ -163,7 +164,7 @@ async function runBuffer() {
     mb.textContent = fmt(8 * p);
     await wait(28);
   }
-  phase.textContent = 'Listo: empieza la película';
+  phase.textContent = text.ready;
 }
 
 let bufRunning = false;

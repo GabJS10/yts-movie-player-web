@@ -1,0 +1,46 @@
+---
+import Doc from '../../../layouts/Doc.astro';
+---
+<Doc
+  title="Subtitles"
+  heading="Subtitles in your language"
+  description="How to get a free OpenSubtitles API key, set it up in YTS Player and adjust subtitles while you watch."
+  lede="The app looks for subtitles on OpenSubtitles and loads the ones that best match your version. For that it needs a free API key, set up just once."
+>
+  <h2 id="api-key">Get the API key</h2>
+  <ol>
+    <li>Create a free account at <a href="https://www.opensubtitles.com">opensubtitles.com</a>.</li>
+    <li>In your profile, go to <strong>API consumers</strong> and create one. Copy the <strong>API key</strong>.</li>
+    <li>In the app, go to <strong>Settings › Subtitles</strong>, paste the key and click <strong>Test</strong>.</li>
+  </ol>
+  <p>The key and your credentials are only stored on your computer.</p>
+
+  <h2 id="language">Subtitle language</h2>
+  <p>Spanish is the default. In <strong>Settings › Subtitles</strong> you can switch to English, Portuguese, French, Italian or German. It's a separate setting from the app's language: you can use the app in English and watch with Spanish subtitles.</p>
+
+  <h2 id="quota">How many you can download</h2>
+  <p>OpenSubtitles limits daily downloads:</p>
+  <div class="table">
+    <table>
+      <thead><tr><th>Account in the app</th><th>Downloads per day</th></tr></thead>
+      <tbody>
+        <tr><td>API key only</td><td>about 5</td></tr>
+        <tr><td>API key + username and password</td><td>about 20</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The username and password are optional and go in the same place, <strong>Settings › Subtitles</strong>. A subtitle you already downloaded is kept on disk and doesn't use up quota again. If you run out, the app offers the OpenSubtitles page so you can download it by hand.</p>
+
+  <h2 id="while-watching">While you watch</h2>
+  <ul>
+    <li>Your preferred language loads by default; other languages are available from the player's subtitles menu.</li>
+    <li>Subtitles that match your version are marked <strong>Your version</strong>.</li>
+    <li>If they're early or late, adjust the delay in the menu or with <kbd>G</kbd> and <kbd>H</kbd> (0.1 seconds less or more, like in VLC).</li>
+    <li>Have your own file? Load it from the menu (<code>.srt</code> or <code>.vtt</code>) or drag the <code>.srt</code> onto the window.</li>
+    <li>If a version opens in VLC, the subtitles and their delay go with it.</li>
+  </ul>
+
+  <div class="note">
+    <p>YTS Player has no connection with OpenSubtitles: it uses their public API with each person's own key.</p>
+  </div>
+</Doc>

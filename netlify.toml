@@ -19,6 +19,12 @@
   force = true
 
 [[redirects]]
+  from = "/en.html"
+  to = "/en"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/descargar.html"
   to = "/descargar"
   status = 301
@@ -53,3 +59,45 @@
   to = "/legal"
   status = 301
   force = true
+
+[[redirects]]
+  from = "/en/download.html"
+  to = "/en/download"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/en/docs/subtitles.html"
+  to = "/en/docs/subtitles"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/en/docs/data.html"
+  to = "/en/docs/data"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/en/docs/build.html"
+  to = "/en/docs/build"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/en/changelog.html"
+  to = "/en/changelog"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/en/legal.html"
+  to = "/en/legal"
+  status = 301
+  force = true
+
+# English visitors get the English 404 (the root 404.html is the Spanish one).
+[[redirects]]
+  from = "/en/*"
+  to = "/en/404"
+  status = 404

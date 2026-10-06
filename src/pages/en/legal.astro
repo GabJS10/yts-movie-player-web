@@ -1,0 +1,25 @@
+---
+import Doc from '../../layouts/Doc.astro';
+import license from '../../content/LICENSE.txt?raw';
+import { REPO_URL } from '../../lib/release';
+
+// The licence file is hard-wrapped; reflow it into paragraphs so it reads at any width.
+const paragraphs = license.trim().split(/\n\s*\n/).map((p) => p.replace(/\s*\n\s*/g, ' '));
+---
+<Doc
+  title="Legal notice and licence"
+  description="YTS Player is only a client: it doesn't host or distribute any content. Full legal notice and the MIT licence of the code."
+  lede="What YTS Player is and isn't, whose responsibility its use is, and the licence the code is published under."
+>
+  <h2 id="notice">Legal notice</h2>
+  <p>YTS Player is only a <strong>client</strong>: it doesn't host, upload or distribute any content. It shows the public catalog of the YTS API and uses BitTorrent to download what you choose; while you download, you also share pieces of the file with other users.</p>
+  <p>Much of that catalog is protected by copyright, and downloading or sharing it may be illegal in your country. <strong>Using the app is the responsibility of whoever uses it.</strong></p>
+  <p>This project has no connection with YTS or OpenSubtitles.</p>
+
+  <h2 id="licence">Licence</h2>
+  <p>The app's code is published under the <a href={`${REPO_URL}/blob/main/LICENSE`}>MIT</a> licence. The licence covers the app's code, not the content you reach with it.</p>
+  <div class="license">{paragraphs.map((p) => <p>{p}</p>)}</div>
+
+  <h2 id="fonts">Typeface</h2>
+  <p>This site and the app use Archivo, published under the SIL Open Font License.</p>
+</Doc>

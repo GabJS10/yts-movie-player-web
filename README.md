@@ -34,3 +34,7 @@ Un build hook de Netlify se dispara al publicar una release en el repo de la app
 
 Tokens y estilos base en `src/styles/global.css`; las capturas de la app en `src/assets/screenshots/` (servidas con `astro:assets`, AVIF + WebP).
 
+
+## Licencia
+
+[MIT](LICENSE).

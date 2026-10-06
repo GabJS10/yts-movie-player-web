@@ -48,7 +48,7 @@ const file = {
 
   <h3>Fedora, openSUSE</h3>
   <Cmd label="Fedora" cmd={`sudo dnf install ./${file.rpm}`} />
-  <Cmd label="openSUSE" cmd={`sudo zypper install ./${file.rpm}`} />
+  <Cmd label="openSUSE" cmd={`sudo zypper install --allow-unsigned-rpm ./${file.rpm}`} />
 
   <h3>Cualquier otra distribución</h3>
   <p>El AppImage no se instala: se le da permiso de ejecución y se abre.</p>

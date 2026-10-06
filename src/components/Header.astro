@@ -6,7 +6,7 @@ const path = Astro.url.pathname.replace(/\.html$/, '');
 const current = (prefix: string) => (path === prefix || path.startsWith(`${prefix}/`) ? 'page' : undefined);
 ---
 <header class="top" id="top">
-  <a class="brand" href="/" aria-label="YTS Player, inicio">
+  <a class="brand" href="/">
     <img src="/app-icon.svg" alt="" width="30" height="30" /><b>YTS</b><span>Player</span>
   </a>
   <nav class="nav" aria-label="Principal">
@@ -15,5 +15,5 @@ const current = (prefix: string) => (path === prefix || path.startsWith(`${prefi
     <a href="/novedades" aria-current={current('/novedades')}>Novedades</a>
     <a href={REPO_URL}>GitHub</a>
   </nav>
-  <a class="btn btn-line btn-sm" href="/descargar"><Icon name="dl" /><span>Descargar</span></a>
+  <a class="btn btn-line btn-sm" href="/descargar" aria-label="Descargar"><Icon name="dl" /><span>Descargar</span></a>
 </header>
